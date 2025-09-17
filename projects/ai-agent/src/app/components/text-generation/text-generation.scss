@@ -1,0 +1,52 @@
+.tg-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 16px;
+}
+
+.tg-card, .tg-output {
+  width: 100%;
+}
+
+.tg-form .row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.tg-form .full { width: 100%; }
+.tg-form .half { flex: 1; min-width: 220px; }
+
+.tg-form .actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.slider-label {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: rgba(0,0,0,0.6);
+}
+
+.output {
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  min-height: 180px;
+}
+
+.placeholder {
+  color: rgba(0,0,0,0.6);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+@media (min-width: 1024px) {
+  .tg-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}

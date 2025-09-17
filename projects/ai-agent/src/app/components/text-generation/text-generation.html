@@ -1,0 +1,71 @@
+<div class="tg-container">
+  <mat-card class="tg-card">
+    <mat-card-header>
+      <mat-card-title>Text generation</mat-card-title>
+      <mat-card-subtitle>Prepare a prompt and tune generation settings</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="tg-form">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Prompt</mat-label>
+          <textarea matInput cdkTextareaAutosize rows="8" placeholder="Ask something..."
+                    [formControl]="form.controls.prompt"></textarea>
+          @if (form.controls.prompt.invalid && form.controls.prompt.touched) {
+            <mat-hint class="error">Please enter at least 2 characters.</mat-hint>
+          }
+        </mat-form-field>
+
+        <div class="row">
+          <mat-form-field appearance="fill" class="half">
+            <mat-label>Model</mat-label>
+            <mat-select [formControl]="form.controls.model">
+              @for (m of models; track m.id) {
+                <mat-option [value]="m.id">{{ m.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="half slider">
+            <label class="slider-label">Temperature: {{ form.controls.temperature.value }}</label>
+            <mat-slider min="0" max="1" step="0.1" discrete tickInterval="0.1">
+              <input matSliderThumb [formControl]="form.controls.temperature" />
+            </mat-slider>
+          </div>
+
+        </div>
+
+        <div class="row">
+          <mat-form-field appearance="fill" class="half">
+            <mat-label>Max output tokens</mat-label>
+            <input matInput type="number" [formControl]="form.controls.maxOutputTokens" min="1" max="8192">
+          </mat-form-field>
+          <div class="half actions">
+            <button mat-flat-button color="primary" (click)="generate()" [disabled]="loading()">Generate</button>
+            <button mat-stroked-button color="warn" (click)="stop()" [disabled]="!loading()">Stop</button>
+            <button mat-button (click)="clear()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="tg-output">
+    <mat-card-header>
+      <mat-card-title>Response</mat-card-title>
+      <span class="spacer"></span>
+      <button mat-icon-button (click)="copy()" [disabled]="!output()">
+        <mat-icon>content_copy</mat-icon>
+      </button>
+    </mat-card-header>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <mat-card-content>
+      <pre class="output"
+           [class.placeholder]="!output()">{{ output() || 'The response will appear here. Connect your Google model in generate().' }}</pre>
+    </mat-card-content>
+  </mat-card>
+</div>
