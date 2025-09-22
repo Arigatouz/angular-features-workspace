@@ -48,7 +48,7 @@
               "fileReplacements": [
                 {
                   "replace": "projects/ai-agent/src/environments/environment.ts",
-                  "with": "projects/ai-agent/src/environments/environment.production.ts"
+                  "with": "projects/ai-agent/src/environments/environment.prod.ts"
                 }
               ]
             },
