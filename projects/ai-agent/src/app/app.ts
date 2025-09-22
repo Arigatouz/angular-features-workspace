@@ -1,7 +1,7 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {GoogleGenAI} from "@google/genai";
-import {Environment} from './Environment/environment';
+import {environment} from '../environments/environment';
 import {SideNavComponent} from './components/side-nav/side-nav.component';
 
 @Component({
@@ -13,7 +13,7 @@ import {SideNavComponent} from './components/side-nav/side-nav.component';
 export class App {
   protected readonly title = signal('ai-agent');
   ai = new GoogleGenAI({
-    apiKey: Environment.GOOGLE_API_KEY
+    apiKey: environment.GOOGLE_API_KEY
   })
 
   googleInitialized = async (content: string) => {
