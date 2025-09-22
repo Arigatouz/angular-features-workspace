@@ -8,7 +8,9 @@
       "Bash(ng build)",
       "Bash(claude mcp add:*)",
       "Bash(claude mcp:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
