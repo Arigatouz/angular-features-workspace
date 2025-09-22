@@ -1,71 +1,371 @@
-<div class="tg-container">
-  <mat-card class="tg-card">
-    <mat-card-header>
-      <mat-card-title>Text generation</mat-card-title>
-      <mat-card-subtitle>Prepare a prompt and tune generation settings</mat-card-subtitle>
-    </mat-card-header>
-
-    <mat-card-content>
-      <div class="tg-form">
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Prompt</mat-label>
-          <textarea matInput cdkTextareaAutosize rows="8" placeholder="Ask something..."
-                    [formControl]="form.controls.prompt"></textarea>
-          @if (form.controls.prompt.invalid && form.controls.prompt.touched) {
-            <mat-hint class="error">Please enter at least 2 characters.</mat-hint>
-          }
-        </mat-form-field>
-
-        <div class="row">
-          <mat-form-field appearance="fill" class="half">
-            <mat-label>Model</mat-label>
-            <mat-select [formControl]="form.controls.model">
-              @for (m of models; track m.id) {
-                <mat-option [value]="m.id">{{ m.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <div class="half slider">
-            <label class="slider-label">Temperature: {{ form.controls.temperature.value }}</label>
-            <mat-slider min="0" max="1" step="0.1" discrete tickInterval="0.1">
-              <input matSliderThumb [formControl]="form.controls.temperature" />
-            </mat-slider>
-          </div>
-
-        </div>
-
-        <div class="row">
-          <mat-form-field appearance="fill" class="half">
-            <mat-label>Max output tokens</mat-label>
-            <input matInput type="number" [formControl]="form.controls.maxOutputTokens" min="1" max="8192">
-          </mat-form-field>
-          <div class="half actions">
-            <button mat-flat-button color="primary" (click)="generate()" [disabled]="loading()">Generate</button>
-            <button mat-stroked-button color="warn" (click)="stop()" [disabled]="!loading()">Stop</button>
-            <button mat-button (click)="clear()">Clear</button>
-          </div>
-        </div>
+<mat-sidenav-container class="app-container">
+  <!-- Conversation Sidebar -->
+  <mat-sidenav #sidenav mode="side" [opened]="sidenavOpen()" class="conversation-sidenav">
+    <!-- Sidebar Header -->
+    <div class="sidenav-header">
+      <div class="header-title">
+        <mat-icon>history</mat-icon>
+        <h3>Conversations</h3>
+        <span matBadge="{{conversationCount()}}" matBadgeColor="primary" class="conversation-count"></span>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <mat-card class="tg-output">
-    <mat-card-header>
-      <mat-card-title>Response</mat-card-title>
-      <span class="spacer"></span>
-      <button mat-icon-button (click)="copy()" [disabled]="!output()">
-        <mat-icon>content_copy</mat-icon>
+      <div class="header-actions">
+        <button mat-icon-button (click)="newConversation()" matTooltip="New Conversation">
+          <mat-icon>add</mat-icon>
+        </button>
+        <button mat-icon-button [matMenuTriggerFor]="dataMenu" matTooltip="Data Management">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Database Statistics -->
+    <mat-card class="stats-card">
+      <mat-card-content>
+        <div class="stat-item">
+          <mat-icon>chat</mat-icon>
+          <span>{{conversationCount()}} Conversations</span>
+        </div>
+        <div class="stat-item">
+          <mat-icon>message</mat-icon>
+          <span>{{totalMessages()}} Messages</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Conversations List -->
+    <div class="conversations-list">
+      @if (allConversations().length === 0) {
+        <div class="empty-conversations">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <p>No conversations yet</p>
+          <button mat-button color="primary" (click)="newConversation()">
+            Start chatting
+          </button>
+        </div>
+      } @else {
+        <mat-nav-list>
+          @for (conversation of allConversations(); track conversation.uuid) {
+            <mat-list-item
+              [class.active]="activeConversation()?.uuid === conversation.uuid"
+              class="conversation-item">
+
+              @if (renamingConversation()?.uuid === conversation.uuid) {
+                <!-- Rename Mode -->
+                <div class="rename-container">
+                  <mat-form-field appearance="outline" class="rename-input">
+                    <input matInput
+                           #renameInput
+                           [value]="renamingConversation()!.title"
+                           (keydown.enter)="saveConversationTitle(conversation.uuid, renameInput.value)"
+                           (keydown.escape)="cancelRename()">
+                  </mat-form-field>
+                  <button mat-icon-button (click)="saveConversationTitle(conversation.uuid, renameInput.value)">
+                    <mat-icon>check</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="cancelRename()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              } @else {
+                <!-- Normal Mode -->
+                <div class="conversation-content" (click)="selectConversation(conversation.uuid)">
+                  <div class="conversation-main">
+                    <div class="conversation-title">{{conversation.title}}</div>
+                    <div class="conversation-meta">
+                      {{conversation.messages.length}} messages • {{conversation.updatedAt | date:'short'}}
+                    </div>
+                  </div>
+
+                  <button mat-icon-button [matMenuTriggerFor]="conversationMenu"
+                          class="conversation-menu-button"
+                          (click)="$event.stopPropagation()">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+
+                  <!-- Conversation Context Menu -->
+                  <mat-menu #conversationMenu="matMenu">
+                    <button mat-menu-item (click)="startRenameConversation(conversation)">
+                      <mat-icon>edit</mat-icon>
+                      <span>Rename</span>
+                    </button>
+                    <button mat-menu-item (click)="exportCurrentConversation()">
+                      <mat-icon>download</mat-icon>
+                      <span>Export</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button mat-menu-item (click)="deleteConversation(conversation.uuid)" class="delete-action">
+                      <mat-icon color="warn">delete</mat-icon>
+                      <span>Delete</span>
+                    </button>
+                  </mat-menu>
+                </div>
+              }
+            </mat-list-item>
+          }
+        </mat-nav-list>
+      }
+    </div>
+
+    <!-- Data Management Menu -->
+    <mat-menu #dataMenu="matMenu">
+      <button mat-menu-item (click)="exportAllConversations()">
+        <mat-icon>download</mat-icon>
+        <span>Export All</span>
       </button>
-    </mat-card-header>
+      <label mat-menu-item for="importFile">
+        <mat-icon>upload</mat-icon>
+        <span>Import</span>
+        <input type="file" id="importFile" accept=".json" style="display: none"
+               (change)="onFileSelected($event)">
+      </label>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="clearAllConversations()" class="delete-action">
+        <mat-icon color="warn">delete_sweep</mat-icon>
+        <span>Clear All</span>
+      </button>
+    </mat-menu>
 
-    @if (loading()) {
-      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    }
+    <!-- API Key Management Menu -->
+    <mat-menu #apiKeyMenu="matMenu">
+      @if (apiKeyService.hasApiKey()) {
+        <div class="menu-header">
+          <mat-icon>vpn_key</mat-icon>
+          <span>{{ getApiKeyStatus() }}</span>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="changeApiKey()">
+          <mat-icon>edit</mat-icon>
+          <span>Change API Key</span>
+        </button>
+        <button mat-menu-item (click)="clearApiKey()" class="delete-action">
+          <mat-icon color="warn">key_off</mat-icon>
+          <span>Clear API Key</span>
+        </button>
+      } @else {
+        <button mat-menu-item (click)="showApiKeyModal()">
+          <mat-icon>vpn_key</mat-icon>
+          <span>Set API Key</span>
+        </button>
+      }
+    </mat-menu>
+  </mat-sidenav>
 
-    <mat-card-content>
-      <pre class="output"
-           [class.placeholder]="!output()">{{ output() || 'The response will appear here. Connect your Google model in generate().' }}</pre>
-    </mat-card-content>
-  </mat-card>
-</div>
+  <!-- Main Content -->
+  <mat-sidenav-content class="main-content">
+    <div class="chat-container">
+      <!-- Enhanced Chat Header -->
+      <mat-card class="chat-header">
+        <mat-card-header>
+          <div class="header-content">
+            <div class="left-section">
+              <button mat-icon-button (click)="toggleSidebar()" matTooltip="Toggle Conversations">
+                <mat-icon>menu</mat-icon>
+              </button>
+
+              <div class="conversation-info">
+                <mat-card-title>
+                  {{ activeConversation()?.title || 'AI Assistant' }}
+                </mat-card-title>
+                <mat-card-subtitle>
+                  @if (activeConversation()) {
+                    {{ messages().length }} messages • Updated {{ activeConversation()!.updatedAt | date:'short' }}
+                  } @else {
+                    Start a new conversation
+                  }
+                </mat-card-subtitle>
+              </div>
+            </div>
+
+            <div class="header-actions">
+              <button mat-icon-button (click)="newConversation()" matTooltip="New Conversation">
+                <mat-icon>add</mat-icon>
+              </button>
+              <button mat-icon-button (click)="copyConversation()"
+                      [disabled]="!activeConversation()" matTooltip="Copy Conversation">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+              <button mat-icon-button (click)="exportCurrentConversation()"
+                      [disabled]="!activeConversation()" matTooltip="Export Conversation">
+                <mat-icon>download</mat-icon>
+              </button>
+              <button mat-icon-button [matMenuTriggerFor]="apiKeyMenu"
+                      [matTooltip]="getApiKeyStatus()">
+                <mat-icon [color]="apiKeyService.isValidated() ? 'primary' : 'warn'">
+                  {{ apiKeyService.hasApiKey() ? 'vpn_key' : 'key_off' }}
+                </mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card-header>
+
+        @if (serviceError(); as error) {
+          <mat-card-content class="error-banner">
+            <div class="error-message">
+              <mat-icon color="warn">error</mat-icon>
+              <span>{{ error.message }}</span>
+              <button mat-icon-button (click)="dismissError()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </mat-card-content>
+        }
+      </mat-card>
+
+      <!-- Enhanced Chat Messages -->
+      <div class="chat-messages" #messagesContainer>
+        @if (messages().length === 0) {
+          <div class="empty-state">
+            <mat-icon>chat</mat-icon>
+            <h3>Start a conversation</h3>
+            <p>Ask me anything and I'll help you with information, creative writing, coding, and more!</p>
+          </div>
+        } @else {
+          @for (message of messages(); track message.id) {
+            <div class="message" [class]="'message-' + message.role">
+              <div class="message-avatar">
+                <mat-icon>
+                  {{ message.role === 'user' ? 'person' : 'smart_toy' }}
+                </mat-icon>
+              </div>
+              <div class="message-content">
+                <div class="message-header">
+                  <span class="message-role">{{ message.role === 'user' ? 'You' : 'Assistant' }}</span>
+                  <span class="message-time">{{ message.timestamp | date:'short' }}</span>
+
+                  <div class="message-actions">
+                    @if (editingMessage()?.id === message.id) {
+                      <button mat-icon-button (click)="cancelMessageEdit()" matTooltip="Cancel edit">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    } @else {
+                      <button mat-icon-button (click)="copyMessage(message.content)" matTooltip="Copy message">
+                        <mat-icon>content_copy</mat-icon>
+                      </button>
+                      @if (message.role === 'user') {
+                        <button mat-icon-button (click)="startEditMessage(message)" matTooltip="Edit message">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                      }
+                    }
+                  </div>
+                </div>
+
+                @if (editingMessage()?.id === message.id) {
+                  <!-- Edit Mode -->
+                  <div class="edit-container">
+                    <mat-form-field appearance="outline" class="edit-input">
+                      <textarea matInput cdkTextareaAutosize
+                                #editTextarea
+                                [value]="editingMessage()!.content"
+                                (keydown.ctrl.enter)="saveMessageEdit(message.id!, editTextarea.value)"
+                                (keydown.escape)="cancelMessageEdit()"></textarea>
+                    </mat-form-field>
+                    <div class="edit-actions">
+                      <button mat-button (click)="saveMessageEdit(message.id!, editTextarea.value)">
+                        Save
+                      </button>
+                      <button mat-button (click)="cancelMessageEdit()">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <!-- Display Mode -->
+                  <div class="message-text" [innerHTML]="message.content | markdown"></div>
+                  @if (message.metadata) {
+                    <div class="message-metadata">
+                      @if (message.metadata.temperature !== undefined) {
+                        <span>Temp: {{ message.metadata.temperature }}</span>
+                      }
+                      @if (message.metadata.maxTokens) {
+                        <span>Max tokens: {{ message.metadata.maxTokens }}</span>
+                      }
+                      @if (message.metadata.tokensUsed) {
+                        <span>Used: {{ message.metadata.tokensUsed }} tokens</span>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          }
+        }
+
+        @if (loading()) {
+          <div class="message message-assistant">
+            <div class="message-avatar">
+              <mat-icon>smart_toy</mat-icon>
+            </div>
+            <div class="message-content">
+              <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Chat Input -->
+      <mat-card class="chat-input">
+        <!-- Settings Panel (Collapsible) -->
+        <div class="settings-panel" [class.collapsed]="true">
+          <div class="settings-row">
+            <mat-form-field appearance="fill" class="model-select">
+              <mat-label>Model</mat-label>
+              <mat-select [formControl]="form.controls.model">
+                @for (m of models; track m.id) {
+                  <mat-option [value]="m.id">{{ m.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <div class="slider-control">
+              <label class="slider-label">Temperature: {{ form.controls.temperature.value }}</label>
+              <mat-slider min="0" max="1" step="0.1" discrete>
+                <input matSliderThumb [formControl]="form.controls.temperature" />
+              </mat-slider>
+            </div>
+
+            <mat-form-field appearance="fill" class="tokens-input">
+              <mat-label>Max tokens</mat-label>
+              <input matInput type="number" [formControl]="form.controls.maxOutputTokens" min="1" max="8192">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <mat-card-content class="input-area">
+          <div class="input-container">
+            <mat-form-field appearance="outline" class="prompt-input">
+              <textarea matInput cdkTextareaAutosize rows="1" maxRows="6"
+                        placeholder="Type your message..."
+                        [formControl]="form.controls.prompt"
+                        (keydown)="onKeyDown($event)"></textarea>
+            </mat-form-field>
+
+            <div class="input-actions">
+              @if (loading() || isServiceGenerating()) {
+                <button mat-fab color="warn" (click)="stop()" matTooltip="Stop generation">
+                  <mat-icon>stop</mat-icon>
+                </button>
+              } @else {
+                <button mat-fab color="primary" (click)="generate()"
+                        [disabled]="!isServiceInitialized() || form.controls.prompt.invalid"
+                        matTooltip="Send message (Enter)">
+                  <mat-icon>send</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (form.controls.prompt.invalid && form.controls.prompt.touched) {
+            <mat-error>Please enter at least 2 characters.</mat-error>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
