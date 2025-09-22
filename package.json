@@ -5,9 +5,13 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration production",
+    "build:github-pages": "ng build --configuration production --base-href \"/angular-features-workspace/\"",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:ssr-agent": "node dist/ssr-agent/server/server.mjs"
+    "serve:ssr:ssr-agent": "node dist/ssr-agent/server/server.mjs",
+    "deploy:github-pages": "npm run build:github-pages && cp dist/ai-agent/browser/index.html dist/ai-agent/browser/404.html && touch dist/ai-agent/browser/.nojekyll",
+    "preview:github-pages": "npm run deploy:github-pages && cd dist/ai-agent/browser && python -m http.server 8080"
   },
   "prettier": {
     "overrides": [
