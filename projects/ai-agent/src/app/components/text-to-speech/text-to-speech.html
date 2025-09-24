@@ -1,0 +1,256 @@
+<div class="tts-container">
+  <div class="main-content">
+    <!-- Header -->
+    <div class="header-section">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">record_voice_over</mat-icon>
+        Text-to-Speech Generator
+      </h1>
+      <p class="page-description">
+        Convert your text into natural-sounding speech using Google's advanced AI voice synthesis.
+      </p>
+    </div>
+
+    <!-- Generation Form -->
+    <mat-card class="generation-form-card">
+      <mat-card-header>
+        <mat-card-title>Generate Speech</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="generateSpeech()" class="generation-form">
+
+          <!-- Text Input -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Text to speak</mat-label>
+            <textarea
+              matInput
+              formControlName="text"
+              placeholder="Enter the text you want to convert to speech..."
+              rows="4"
+              (keydown)="onKeyDown($event)"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="3"
+              cdkAutosizeMaxRows="10"
+            ></textarea>
+            <mat-icon matSuffix>text_fields</mat-icon>
+            @if (form.get('text')?.invalid && form.get('text')?.touched) {
+              <mat-error>
+                @if (form.get('text')?.errors?.['required']) {
+                  Text is required
+                }
+                @if (form.get('text')?.errors?.['minlength']) {
+                  Text must be at least 2 characters long
+                }
+              </mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Voice Selection -->
+          <mat-form-field appearance="outline" class="voice-select">
+            <mat-label>Voice</mat-label>
+            <mat-select formControlName="voiceName">
+              @for (voice of voiceOptions; track voice.id) {
+                <mat-option [value]="voice.id">{{ voice.label }}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>person</mat-icon>
+          </mat-form-field>
+
+          <!-- Control Buttons -->
+          <div class="form-buttons">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="form.invalid || isServiceGenerating() || !isServiceInitialized()"
+              class="generate-btn"
+            >
+              @if (isServiceGenerating()) {
+                <mat-icon>hourglass_empty</mat-icon>
+                Generating...
+              } @else {
+                <mat-icon>play_arrow</mat-icon>
+                Generate Speech
+              }
+            </button>
+
+            @if (isServiceGenerating()) {
+              <button mat-stroked-button type="button" (click)="stop()" class="stop-btn">
+                <mat-icon>stop</mat-icon>
+                Stop
+              </button>
+            }
+
+            <button mat-stroked-button type="button" (click)="clearText()">
+              <mat-icon>clear</mat-icon>
+              Clear
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          @if (isServiceGenerating()) {
+            <mat-progress-bar mode="indeterminate" class="progress-bar"></mat-progress-bar>
+          }
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Error Display -->
+    @if (serviceError() || error()) {
+      <mat-card class="error-card">
+        <mat-card-content>
+          <div class="error-content">
+            <mat-icon class="error-icon">error</mat-icon>
+            <div class="error-details">
+              <h4>Generation Error</h4>
+              <p>{{ (serviceError() || error())?.message }}</p>
+              @if ((serviceError() || error())?.type === 'API_KEY_MISSING') {
+                <button mat-stroked-button color="primary" (click)="showApiKeyModal()">
+                  <mat-icon>key</mat-icon>
+                  Configure API Key
+                </button>
+              }
+            </div>
+            <button mat-icon-button (click)="dismissError()" class="dismiss-btn">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <!-- Audio History Sidebar -->
+  <div class="sidebar">
+    <mat-card class="history-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>history</mat-icon>
+          Audio History
+          @if (totalGeneratedAudios() > 0) {
+            <mat-chip-set>
+              <mat-chip>{{ totalGeneratedAudios() }}</mat-chip>
+            </mat-chip-set>
+          }
+        </mat-card-title>
+        <mat-card-subtitle>Recently generated audio files</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (generatedAudios().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">audiotrack</mat-icon>
+            <p>No audio generated yet</p>
+            <small>Generate your first speech to see it here</small>
+          </div>
+        } @else {
+          <div class="audio-list" #audioHistoryContainer>
+            @for (audio of generatedAudios(); track $index) {
+              <div class="audio-item">
+                <div class="audio-header">
+                  @if (isAudioPlaying($index)) {
+                    <mat-icon class="audio-icon playing">volume_up</mat-icon>
+                  } @else {
+                    <mat-icon class="audio-icon">audiotrack</mat-icon>
+                  }
+                  <div class="audio-meta">
+                    <span class="audio-voice">
+                      {{ audio.voiceName }}
+                      @if (isAudioPlaying($index)) {
+                        <span class="playing-indicator">• Playing</span>
+                      }
+                    </span>
+                    <small class="audio-time">{{ audio.timestamp | date:'short' }}</small>
+                  </div>
+                  <button mat-icon-button [matMenuTriggerFor]="audioMenu" class="audio-menu-btn">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+
+                  <mat-menu #audioMenu="matMenu">
+                    @if (isAudioPlaying($index)) {
+                      <button mat-menu-item (click)="stopAudio($index)">
+                        <mat-icon>stop</mat-icon>
+                        Stop Playing
+                      </button>
+                    } @else {
+                      <button mat-menu-item (click)="playAudio(audio, $index)">
+                        <mat-icon>play_arrow</mat-icon>
+                        Play Audio
+                      </button>
+                    }
+                    <button mat-menu-item (click)="downloadAudioFromHistory(audio)">
+                      <mat-icon>download</mat-icon>
+                      Download Audio
+                    </button>
+                    <button mat-menu-item (click)="copyText(audio.text)">
+                      <mat-icon>content_copy</mat-icon>
+                      Copy Text
+                    </button>
+                    <button mat-menu-item (click)="removeAudio($index)">
+                      <mat-icon>delete</mat-icon>
+                      Remove
+                    </button>
+                  </mat-menu>
+                </div>
+
+                <div class="audio-text">
+                  <p>{{ audio.text }}</p>
+                </div>
+
+                <div class="audio-actions">
+                  @if (isAudioPlaying($index)) {
+                    <button mat-raised-button color="accent" (click)="stopAudio($index)" class="play-btn">
+                      <mat-icon>stop</mat-icon>
+                      Stop
+                    </button>
+                  } @else {
+                    <button mat-raised-button color="primary" (click)="playAudio(audio, $index)" class="play-btn">
+                      <mat-icon>play_arrow</mat-icon>
+                      Play
+                    </button>
+                  }
+                  <button mat-stroked-button (click)="downloadAudioFromHistory(audio)" class="download-btn">
+                    <mat-icon>download</mat-icon>
+                    Download
+                  </button>
+                </div>
+              </div>
+
+              @if ($index < generatedAudios().length - 1) {
+                <mat-divider></mat-divider>
+              }
+            }
+          </div>
+
+          <div class="history-actions">
+            <button mat-stroked-button (click)="clearAllAudios()" color="warn">
+              <mat-icon>clear_all</mat-icon>
+              Clear All
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Stats Card -->
+    <mat-card class="stats-card">
+      <mat-card-content>
+        <div class="stat-item">
+          <mat-icon>audiotrack</mat-icon>
+          <div class="stat-content">
+            <span class="stat-value">{{ totalGeneratedAudios() }}</span>
+            <span class="stat-label">Audio Files Generated</span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <mat-icon>verified</mat-icon>
+          <div class="stat-content">
+            <span class="stat-value">{{ getApiKeyStatus() }}</span>
+            <span class="stat-label">API Status</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

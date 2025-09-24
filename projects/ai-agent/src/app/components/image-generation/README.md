@@ -407,6 +407,14 @@ if (!environment.production) {
 - Follow reactive forms best practices
 - Use semantic HTML and ARIA attributes
 
+## Related Components
+
+- **TextGeneration**: Main AI conversation interface with Google Gemini
+- **TextToSpeechGeneration**: Convert text to natural-sounding speech using Google's TTS AI
+- **VideoUnderstanding**: Analyze and understand YouTube videos using Google's vision models
+- **SideNavComponent**: Navigation between all AI generation features
+- **ApiKeyModalComponent**: Shared API key management across all components
+
 ## Related Files
 
 - **ImageGenAiService**: `../services/image-gen-ai.ts`

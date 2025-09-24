@@ -256,7 +256,7 @@ export class ImageGenAiService {
     return {
       images,
       prompt: request.prompt,
-      model: 'gemini-2.5-flash-image-preview',
+      model: 'gemini-2.5-flash', // what are other models? "gemini-1.5-image-alpha", "gemini-2.5-image-preview"
       timestamp: new Date(),
       metadata: {
         style: request.style,

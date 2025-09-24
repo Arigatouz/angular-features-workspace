@@ -18,7 +18,8 @@
       "Bash(git remote remove:*)",
       "Bash(npm run build:prod:*)",
       "WebFetch(domain:arigatouz.github.io)",
-      "Bash(ng build:*)"
+      "Bash(ng build:*)",
+      "mcp__angular-cli__get_best_practices"
     ],
     "deny": [],
     "ask": []
