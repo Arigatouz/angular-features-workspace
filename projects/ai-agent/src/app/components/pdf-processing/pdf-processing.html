@@ -1,0 +1,459 @@
+<div class="pdf-container">
+  <div class="main-content">
+    <!-- Header -->
+    <div class="header-section">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">picture_as_pdf</mat-icon>
+        PDF Processing & Analysis
+      </h1>
+      <p class="page-description">
+        Upload and analyze PDF documents using Google's advanced AI. Compare papers, extract insights, and get comprehensive analysis.
+      </p>
+    </div>
+
+    <!-- Upload Section -->
+    <mat-card class="upload-card">
+      <mat-card-header>
+        <mat-card-title>Upload PDFs</mat-card-title>
+        <mat-card-subtitle>Upload documents from URL or local files</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="uploadForm" (ngSubmit)="uploadPdf()" class="upload-form">
+
+          <!-- Upload Type Selection -->
+          <mat-form-field appearance="outline" class="upload-type-select">
+            <mat-label>Upload Method</mat-label>
+            <mat-select formControlName="uploadType">
+              <mat-option value="url">From URL</mat-option>
+              <mat-option value="file">Local Files</mat-option>
+            </mat-select>
+            <mat-icon matSuffix>cloud_upload</mat-icon>
+          </mat-form-field>
+
+          <div class="upload-inputs">
+            <!-- URL Input -->
+            @if (isUploadTypeUrl()) {
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>PDF URL</mat-label>
+                <input
+                  matInput
+                  formControlName="url"
+                  placeholder="https://example.com/document.pdf"
+                  type="url"
+                >
+                <mat-icon matSuffix>link</mat-icon>
+                @if (uploadForm.get('url')?.invalid && uploadForm.get('url')?.touched) {
+                  <mat-error>
+                    @if (uploadForm.get('url')?.errors?.['required']) {
+                      URL is required
+                    }
+                    @if (uploadForm.get('url')?.errors?.['pattern']) {
+                      Please enter a valid PDF URL
+                    }
+                  </mat-error>
+                }
+              </mat-form-field>
+            } @else {
+              <!-- File Upload Area -->
+              <div
+                class="file-drop-area"
+                [class.dragging]="isDragging()"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+                (click)="fileInput.click()"
+              >
+                <input
+                  #fileInput
+                  type="file"
+                  multiple
+                  accept=".pdf,application/pdf"
+                  (change)="onFileSelect($event)"
+                  style="display: none;"
+                >
+
+                <div class="drop-content">
+                  @if (selectedFiles().length === 0) {
+                    <mat-icon class="drop-icon">cloud_upload</mat-icon>
+                    <p class="drop-text">Drag & drop PDF files here or click to browse</p>
+                    <small class="drop-hint">Supports multiple PDF files</small>
+                  } @else {
+                    <mat-icon class="drop-icon selected">description</mat-icon>
+                    <p class="drop-text">{{ selectedFiles().length }} file(s) selected</p>
+                    <div class="selected-files">
+                      @for (file of selectedFiles(); track file.name) {
+                        <div class="file-item">
+                          <span>{{ file.name }}</span>
+                          <small>({{ getFileSize(file.size) }})</small>
+                        </div>
+                      }
+                    </div>
+                    <button type="button" mat-stroked-button (click)="clearSelectedFiles(); $event.stopPropagation()" class="clear-files-btn">
+                      <mat-icon>clear</mat-icon>
+                      Clear Files
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Display Name -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Display Name</mat-label>
+              <input
+                matInput
+                formControlName="displayName"
+                placeholder="Enter a descriptive name for this document"
+              >
+              <mat-icon matSuffix>label</mat-icon>
+              @if (uploadForm.get('displayName')?.invalid && uploadForm.get('displayName')?.touched) {
+                <mat-error>
+                  @if (uploadForm.get('displayName')?.errors?.['required']) {
+                    Display name is required
+                  }
+                  @if (uploadForm.get('displayName')?.errors?.['minlength']) {
+                    Display name must be at least 2 characters long
+                  }
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Upload Progress -->
+          @if (isUploading()) {
+            <div class="upload-progress">
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              <p class="progress-text">{{ uploadProgress() }}</p>
+            </div>
+          }
+
+          <!-- Upload Button -->
+          <div class="form-buttons">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="uploadForm.invalid || isUploading() || !isServiceInitialized() || (!isUploadTypeUrl() && selectedFiles().length === 0)"
+              class="upload-btn"
+            >
+              @if (isUploading()) {
+                <mat-icon>hourglass_empty</mat-icon>
+                Uploading...
+              } @else {
+                <mat-icon>upload</mat-icon>
+                Upload PDF
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Processed PDFs List -->
+    @if (totalProcessedPdfs() > 0) {
+      <mat-card class="pdfs-list-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>folder</mat-icon>
+            Processed PDFs
+            <mat-chip-set>
+              <mat-chip>{{ totalProcessedPdfs() }}</mat-chip>
+            </mat-chip-set>
+          </mat-card-title>
+          <mat-card-subtitle>Ready for analysis</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="pdfs-list">
+            @for (pdf of processedPdfs(); track pdf.uri) {
+              <div class="pdf-item">
+                <div class="pdf-info">
+                  <mat-icon class="pdf-icon">picture_as_pdf</mat-icon>
+                  <div class="pdf-details">
+                    <span class="pdf-name">{{ pdf.displayName }}</span>
+                    <div class="pdf-meta">
+                      <small class="pdf-source">
+                        {{ pdf.source === 'url' ? 'URL' : 'File' }}:
+                        {{ pdf.source === 'url' ? pdf.originalUrl : pdf.fileName }}
+                      </small>
+                      @if (pdf.size) {
+                        <small class="pdf-size">{{ getFileSize(pdf.size) }}</small>
+                      }
+                      <small class="pdf-time">{{ pdf.uploadedAt | date:'short' }}</small>
+                    </div>
+                  </div>
+                </div>
+                <button mat-icon-button (click)="removePdf($index)" class="remove-pdf-btn" matTooltip="Remove PDF">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+          <div class="pdfs-actions">
+            <button mat-stroked-button (click)="clearAllPdfs()" color="warn">
+              <mat-icon>clear_all</mat-icon>
+              Clear All PDFs
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Analysis Section -->
+    <mat-card class="analysis-card">
+      <mat-card-header>
+        <mat-card-title>Analyze Documents</mat-card-title>
+        <mat-card-subtitle>
+          @if (totalProcessedPdfs() > 0) {
+            Ask questions about your uploaded PDFs
+          } @else {
+            First upload PDFs, then analyze them with AI
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (totalProcessedPdfs() === 0) {
+          <div class="workflow-guide">
+            <mat-icon class="guide-icon">info</mat-icon>
+            <div class="guide-content">
+              <h4>How to analyze PDFs:</h4>
+              <ol>
+                <li>Select upload method (URL or Local files)</li>
+                <li>Choose your PDF files or enter URL</li>
+                <li>Enter a descriptive name</li>
+                <li><strong>Click "Upload PDF" to process</strong></li>
+                <li>Once uploaded, analysis options will appear here</li>
+              </ol>
+            </div>
+          </div>
+        } @else {
+          <form [formGroup]="analysisForm" (ngSubmit)="analyzeDocuments()" class="analysis-form">
+
+            <!-- Prompt Suggestions -->
+            <div class="prompt-suggestions">
+              <p class="suggestions-label">Quick prompts:</p>
+              <div class="suggestions-chips">
+                @for (suggestion of promptSuggestions; track suggestion) {
+                  <mat-chip (click)="useSuggestion(suggestion)" class="suggestion-chip">
+                    {{ suggestion }}
+                  </mat-chip>
+                }
+              </div>
+            </div>
+
+            <!-- Analysis Prompt -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Analysis Prompt</mat-label>
+              <textarea
+                matInput
+                formControlName="prompt"
+                placeholder="What would you like to know about these documents? (Ctrl+Enter to analyze)"
+                rows="4"
+                (keydown)="onKeyDown($event)"
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="3"
+                cdkAutosizeMaxRows="8"
+              ></textarea>
+              <mat-icon matSuffix>psychology</mat-icon>
+              @if (analysisForm.get('prompt')?.invalid && analysisForm.get('prompt')?.touched) {
+                <mat-error>
+                  @if (analysisForm.get('prompt')?.errors?.['required']) {
+                    Analysis prompt is required
+                  }
+                  @if (analysisForm.get('prompt')?.errors?.['minlength']) {
+                    Prompt must be at least 10 characters long
+                  }
+                </mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Analysis Buttons -->
+            <div class="form-buttons">
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                class="analyze-btn"
+              >
+                @if (isProcessing()) {
+                  <mat-icon>hourglass_empty</mat-icon>
+                  Analyzing...
+                } @else {
+                  <mat-icon>analytics</mat-icon>
+                  Analyze Documents
+                }
+              </button>
+
+              @if (isProcessing()) {
+                <button mat-stroked-button type="button" (click)="stop()" class="stop-btn">
+                  <mat-icon>stop</mat-icon>
+                  Stop
+                </button>
+              }
+            </div>
+
+            <!-- Progress Bar -->
+            @if (isProcessing()) {
+              <mat-progress-bar mode="indeterminate" class="progress-bar"></mat-progress-bar>
+            }
+          </form>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Error Display -->
+    @if (serviceError() || error()) {
+      <mat-card class="error-card">
+        <mat-card-content>
+          <div class="error-content">
+            <mat-icon class="error-icon">error</mat-icon>
+            <div class="error-details">
+              <h4>Processing Error</h4>
+              <p>{{ (serviceError() || error())?.message }}</p>
+              @if ((serviceError() || error())?.type === 'API_KEY_MISSING') {
+                <button mat-stroked-button color="primary" (click)="showApiKeyModal()">
+                  <mat-icon>key</mat-icon>
+                  Configure API Key
+                </button>
+              }
+            </div>
+            <button mat-icon-button (click)="dismissError()" class="dismiss-btn">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <!-- Analysis History Sidebar -->
+  <div class="sidebar">
+    <mat-card class="history-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>history</mat-icon>
+          Analysis History
+          @if (totalAnalyses() > 0) {
+            <mat-chip-set>
+              <mat-chip>{{ totalAnalyses() }}</mat-chip>
+            </mat-chip-set>
+          }
+        </mat-card-title>
+        <mat-card-subtitle>Previous document analyses</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (analysisHistory().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">analytics</mat-icon>
+            <p>No analyses yet</p>
+            <small>Upload PDFs and run your first analysis to see results here</small>
+          </div>
+        } @else {
+          <div class="analysis-list" #historyContainer>
+            @for (analysis of analysisHistory(); track $index) {
+              <mat-expansion-panel class="analysis-item">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <div class="analysis-header">
+                      <mat-icon class="analysis-icon">analytics</mat-icon>
+                      <div class="analysis-meta">
+                        <span class="analysis-prompt">{{ analysis.prompt | slice:0:60 }}{{ analysis.prompt.length > 60 ? '...' : '' }}</span>
+                        <small class="analysis-time">{{ analysis.timestamp | date:'short' }}</small>
+                      </div>
+                    </div>
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    {{ analysis.pdfs.length }} document(s)
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <div class="analysis-content">
+                  <!-- Documents analyzed -->
+                  <div class="analyzed-docs">
+                    <h5>Documents Analyzed:</h5>
+                    <ul class="docs-list">
+                      @for (pdf of analysis.pdfs; track pdf.uri) {
+                        <li>{{ pdf.displayName }}</li>
+                      }
+                    </ul>
+                  </div>
+
+                  <!-- Full prompt -->
+                  <div class="full-prompt">
+                    <h5>Prompt:</h5>
+                    <p class="prompt-text">{{ analysis.prompt }}</p>
+                  </div>
+
+                  <!-- Analysis result -->
+                  <div class="analysis-result">
+                    <h5>Result:</h5>
+                    <div class="result-text" [innerHTML]="analysis.result | slice:0:500">
+                    </div>
+                    @if (analysis.result.length > 500) {
+                      <p class="result-truncated">... (truncated)</p>
+                    }
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="analysis-actions">
+                    <button mat-stroked-button (click)="copyResult(analysis.result)" class="copy-btn">
+                      <mat-icon>content_copy</mat-icon>
+                      Copy Result
+                    </button>
+                    <button mat-stroked-button (click)="downloadResult(analysis)" class="download-btn">
+                      <mat-icon>download</mat-icon>
+                      Download
+                    </button>
+                    <button mat-icon-button (click)="removeAnalysis($index)" class="remove-btn" matTooltip="Remove Analysis">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+
+              @if ($index < analysisHistory().length - 1) {
+                <mat-divider class="analysis-divider"></mat-divider>
+              }
+            }
+          </div>
+
+          <div class="history-actions">
+            <button mat-stroked-button (click)="clearAnalysisHistory()" color="warn">
+              <mat-icon>clear_all</mat-icon>
+              Clear History
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Stats Card -->
+    <mat-card class="stats-card">
+      <mat-card-content>
+        <div class="stat-item">
+          <mat-icon>picture_as_pdf</mat-icon>
+          <div class="stat-content">
+            <span class="stat-value">{{ totalProcessedPdfs() }}</span>
+            <span class="stat-label">PDFs Processed</span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <mat-icon>analytics</mat-icon>
+          <div class="stat-content">
+            <span class="stat-value">{{ totalAnalyses() }}</span>
+            <span class="stat-label">Analyses Completed</span>
+          </div>
+        </div>
+
+        <div class="stat-item">
+          <mat-icon>verified</mat-icon>
+          <div class="stat-content">
+            <span class="stat-value">{{ getApiKeyStatus() }}</span>
+            <span class="stat-label">API Status</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

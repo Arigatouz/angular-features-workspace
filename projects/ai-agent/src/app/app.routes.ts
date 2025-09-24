@@ -18,6 +18,14 @@ export const routes: Routes = [
     loadComponent: async () => (await import('./components/video-understanding/video-understanding')).VideoUnderstanding
   },
   {
+    path: 'pdf-processing',
+    loadComponent: async () => (await import('./components/pdf-processing/pdf-processing')).PdfProcessingComponent
+  },
+  {
+    path: 'image-editing',
+    loadComponent: async () => (await import('./components/image-editing/image-editing')).ImageEditingComponent
+  },
+  {
     path: '',
     redirectTo: 'text-generation',
     pathMatch: 'full'

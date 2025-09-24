@@ -1,0 +1,719 @@
+.pdf-container {
+  display: flex;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar {
+  width: 450px;
+  flex-shrink: 0;
+}
+
+// Header Section
+.header-section {
+  margin-bottom: 32px;
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #1565C0;
+
+    .title-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  .page-description {
+    margin: 8px 0 0 0;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+// Upload Card
+.upload-card {
+  margin-bottom: 24px;
+
+  .upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .upload-type-select {
+      max-width: 250px;
+    }
+
+    .upload-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .full-width {
+        width: 100%;
+      }
+    }
+
+    .file-drop-area {
+      border: 2px dashed #ccc;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background-color: #fafafa;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover, &.dragging {
+        border-color: #1976D2;
+        background-color: #f0f7ff;
+
+        .drop-icon {
+          color: #1976D2;
+          transform: scale(1.1);
+        }
+      }
+
+      .drop-content {
+        .drop-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          color: #ccc;
+          margin-bottom: 16px;
+          transition: all 0.3s ease;
+
+          &.selected {
+            color: #4CAF50;
+          }
+        }
+
+        .drop-text {
+          margin: 0 0 8px 0;
+          font-weight: 500;
+          color: rgba(0, 0, 0, 0.7);
+        }
+
+        .drop-hint {
+          color: rgba(0, 0, 0, 0.5);
+          font-size: 0.9rem;
+        }
+
+        .selected-files {
+          margin: 16px 0;
+
+          .file-item {
+            background: #e3f2fd;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            span {
+              font-weight: 500;
+            }
+
+            small {
+              color: rgba(0, 0, 0, 0.6);
+            }
+          }
+        }
+
+        .clear-files-btn {
+          margin-top: 12px;
+        }
+      }
+    }
+
+    .upload-progress {
+      .progress-text {
+        margin: 8px 0 0 0;
+        text-align: center;
+        color: rgba(0, 0, 0, 0.7);
+        font-size: 0.9rem;
+      }
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      .upload-btn {
+        min-width: 140px;
+      }
+
+      .stop-btn {
+        color: #D32F2F;
+      }
+    }
+
+    .progress-bar {
+      margin-top: 16px;
+    }
+  }
+}
+
+// PDFs List Card
+.pdfs-list-card {
+  margin-bottom: 24px;
+
+  .pdfs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .pdf-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      background-color: #fafafa;
+
+      .pdf-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+
+        .pdf-icon {
+          color: #F44336;
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+
+        .pdf-details {
+          flex: 1;
+
+          .pdf-name {
+            display: block;
+            font-weight: 500;
+            font-size: 1rem;
+            color: rgba(0, 0, 0, 0.87);
+          }
+
+          .pdf-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 4px;
+
+            small {
+              color: rgba(0, 0, 0, 0.6);
+              font-size: 0.8rem;
+            }
+
+            .pdf-source {
+              max-width: 200px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          }
+        }
+      }
+
+      .remove-pdf-btn {
+        color: #F44336;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .pdfs-actions {
+    margin-top: 16px;
+    text-align: center;
+  }
+}
+
+// Analysis Card
+.analysis-card {
+  margin-bottom: 24px;
+
+  .analysis-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .prompt-suggestions {
+      .suggestions-label {
+        margin: 0 0 12px 0;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.7);
+      }
+
+      .suggestions-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        .suggestion-chip {
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background-color: #e3f2fd;
+            transform: translateY(-1px);
+          }
+        }
+      }
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      .analyze-btn {
+        min-width: 160px;
+      }
+
+      .stop-btn {
+        color: #D32F2F;
+      }
+    }
+
+    .progress-bar {
+      margin-top: 16px;
+    }
+  }
+}
+
+// Error Card
+.error-card {
+  margin-bottom: 24px;
+  border-left: 4px solid #F44336;
+
+  .error-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    .error-icon {
+      color: #F44336;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .error-details {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0 0 12px 0;
+        line-height: 1.5;
+      }
+    }
+
+    .dismiss-btn {
+      flex-shrink: 0;
+    }
+  }
+}
+
+// Sidebar Styles
+.history-card {
+  margin-bottom: 20px;
+  max-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+
+  mat-card-content {
+    flex: 1;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(0, 0, 0, 0.6);
+
+    .empty-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      color: rgba(0, 0, 0, 0.3);
+    }
+
+    p {
+      margin: 0 0 8px 0;
+      font-weight: 500;
+    }
+
+    small {
+      color: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .analysis-list {
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 16px;
+
+    .analysis-item {
+      margin-bottom: 16px;
+
+      mat-expansion-panel-header {
+        padding: 12px 16px;
+
+        .analysis-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          width: 100%;
+
+          .analysis-icon {
+            color: #1976D2;
+            flex-shrink: 0;
+          }
+
+          .analysis-meta {
+            flex: 1;
+            min-width: 0;
+
+            .analysis-prompt {
+              display: block;
+              font-weight: 500;
+              font-size: 0.9rem;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            .analysis-time {
+              color: rgba(0, 0, 0, 0.6);
+              font-size: 0.8rem;
+            }
+          }
+        }
+      }
+
+      .analysis-content {
+        padding: 16px;
+
+        .analyzed-docs {
+          margin-bottom: 16px;
+
+          h5 {
+            margin: 0 0 8px 0;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.8);
+          }
+
+          .docs-list {
+            margin: 0;
+            padding-left: 20px;
+
+            li {
+              color: rgba(0, 0, 0, 0.7);
+              font-size: 0.9rem;
+            }
+          }
+        }
+
+        .full-prompt {
+          margin-bottom: 16px;
+
+          h5 {
+            margin: 0 0 8px 0;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.8);
+          }
+
+          .prompt-text {
+            margin: 0;
+            padding: 12px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: rgba(0, 0, 0, 0.8);
+          }
+        }
+
+        .analysis-result {
+          margin-bottom: 16px;
+
+          h5 {
+            margin: 0 0 8px 0;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.8);
+          }
+
+          .result-text {
+            margin: 0;
+            padding: 12px;
+            background-color: #e8f5e8;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: rgba(0, 0, 0, 0.8);
+            white-space: pre-wrap;
+          }
+
+          .result-truncated {
+            margin: 8px 0 0 0;
+            font-style: italic;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 0.8rem;
+          }
+        }
+
+        .analysis-actions {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          flex-wrap: wrap;
+
+          .copy-btn, .download-btn {
+            min-width: 100px;
+          }
+
+          .remove-btn {
+            color: #F44336;
+            margin-left: auto;
+          }
+        }
+      }
+    }
+
+    .analysis-divider {
+      margin: 8px 0;
+    }
+  }
+
+  .history-actions {
+    padding: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+}
+
+.stats-card {
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+    }
+
+    mat-icon {
+      color: #1976D2;
+      flex-shrink: 0;
+    }
+
+    .stat-content {
+      flex: 1;
+
+      .stat-value {
+        display: block;
+        font-weight: 500;
+        font-size: 0.9rem;
+        word-break: break-all;
+      }
+
+      .stat-label {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .pdf-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .sidebar {
+    width: 100%;
+    order: -1;
+  }
+
+  .history-card {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pdf-container {
+    padding: 16px;
+  }
+
+  .header-section {
+    .page-title {
+      font-size: 1.5rem;
+
+      .title-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+  }
+
+  .upload-form, .analysis-form {
+    .form-buttons {
+      button {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+
+  .file-drop-area {
+    padding: 20px 16px;
+    min-height: 100px;
+
+    .drop-content {
+      .drop-icon {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+      }
+    }
+  }
+
+  .pdf-item {
+    flex-direction: column;
+    align-items: stretch;
+
+    .pdf-info {
+      margin-bottom: 12px;
+    }
+
+    .remove-pdf-btn {
+      align-self: flex-end;
+    }
+  }
+
+  .analysis-list {
+    .analysis-content {
+      .analysis-actions {
+        flex-direction: column;
+
+        .remove-btn {
+          margin-left: 0;
+          align-self: center;
+        }
+      }
+    }
+  }
+}
+
+// Material Theme Adjustments
+.mat-mdc-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  background-color: #1976D2;
+}
+
+.mat-mdc-chip-set {
+  margin-left: 8px;
+}
+
+.mat-mdc-chip {
+  --mdc-chip-label-text-size: 0.8rem;
+  height: 24px;
+}
+
+.mat-expansion-panel {
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+// Scrollbar Styling
+.analysis-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.analysis-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.analysis-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.analysis-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pdf-item,
+.analysis-item {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Drag and Drop Visual Feedback
+.file-drop-area.dragging {
+  border-color: #1976D2;
+  background: linear-gradient(45deg, #f0f7ff 25%, transparent 25%),
+              linear-gradient(-45deg, #f0f7ff 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #f0f7ff 75%),
+              linear-gradient(-45deg, transparent 75%, #f0f7ff 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  animation: stripe-move 2s linear infinite;
+}
+
+@keyframes stripe-move {
+  0% {
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+  100% {
+    background-position: 20px 0, 20px 10px, 30px -10px, 10px 0px;
+  }
+}
