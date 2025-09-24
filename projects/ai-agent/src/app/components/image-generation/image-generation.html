@@ -1,0 +1,282 @@
+<div class="image-generation-container">
+
+  <!-- Header Section -->
+  <mat-card class="header-card">
+    <mat-card-header>
+      <div class="header-content">
+        <div class="left-section">
+          <mat-icon>image</mat-icon>
+          <div class="title-info">
+            <mat-card-title>AI Image Generator</mat-card-title>
+            <mat-card-subtitle>Create stunning images with AI</mat-card-subtitle>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button mat-icon-button
+                  matTooltip="Clear all images"
+                  [disabled]="!hasGeneratedImages()"
+                  (click)="clearAllImages()">
+            <mat-icon>delete_sweep</mat-icon>
+          </button>
+
+          <button mat-icon-button
+                  [matMenuTriggerFor]="apiKeyMenu"
+                  matTooltip="API Key Settings">
+            <mat-icon>key</mat-icon>
+          </button>
+
+          <mat-menu #apiKeyMenu="matMenu">
+            <div class="menu-header">
+              <mat-icon>info</mat-icon>
+              <span>{{ getApiKeyStatus() }}</span>
+            </div>
+            <button mat-menu-item (click)="changeApiKey()">
+              <mat-icon>edit</mat-icon>
+              <span>Change API Key</span>
+            </button>
+            <button mat-menu-item (click)="clearApiKey()">
+              <mat-icon>clear</mat-icon>
+              <span>Clear API Key</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </mat-card-header>
+  </mat-card>
+
+  <!-- Error Banner -->
+  <mat-card class="error-banner" *ngIf="serviceError() || error()">
+    <div class="error-message">
+      <mat-icon>error</mat-icon>
+      <span>{{ (serviceError() || error())?.message }}</span>
+      <button mat-icon-button (click)="dismissError()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </mat-card>
+
+  <!-- AI Notice -->
+  <mat-card class="demo-notice-card">
+    <mat-card-content>
+      <div class="demo-notice">
+        <mat-icon>auto_awesome</mat-icon>
+        <span><strong>AI Image Generation:</strong> Powered by Google Gemini 2.5 Flash Image Preview. Your prompts will be enhanced with style and quality specifications for optimal results.</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Generation Form -->
+  <mat-card class="generation-card">
+    <mat-card-content>
+
+      <!-- Settings Panel -->
+      <div class="settings-panel" [class.collapsed]="!settingsExpanded()">
+        <div class="settings-header" (click)="toggleSettings()">
+          <h3>Generation Settings</h3>
+          <button mat-icon-button>
+            <mat-icon>{{ settingsExpanded() ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</mat-icon>
+          </button>
+        </div>
+
+        <div class="settings-content" *ngIf="settingsExpanded()">
+          <form [formGroup]="form">
+            <div class="settings-row">
+              <!-- Style Selection -->
+              <mat-form-field class="style-select">
+                <mat-label>Style</mat-label>
+                <mat-select formControlName="style">
+                  <mat-option *ngFor="let style of styleOptions" [value]="style.id">
+                    {{ style.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Size Selection -->
+              <mat-form-field class="size-select">
+                <mat-label>Size</mat-label>
+                <mat-select formControlName="size">
+                  <mat-option *ngFor="let size of sizeOptions" [value]="size.id">
+                    {{ size.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Quality Selection -->
+              <mat-form-field class="quality-select">
+                <mat-label>Quality</mat-label>
+                <mat-select formControlName="quality">
+                  <mat-option *ngFor="let quality of qualityOptions" [value]="quality.id">
+                    {{ quality.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Image Count -->
+              <mat-form-field class="count-input">
+                <mat-label>Count</mat-label>
+                <input matInput
+                       type="number"
+                       formControlName="count"
+                       min="1"
+                       max="4">
+                <mat-hint>1-4 images</mat-hint>
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Main Form -->
+      <form [formGroup]="form" (ngSubmit)="generateImages()" (keydown)="onKeyDown($event)">
+
+        <!-- Prompt Input -->
+        <div class="input-container">
+          <mat-form-field class="prompt-input">
+            <mat-label>Describe the image you want to create</mat-label>
+            <textarea matInput
+                      cdkTextareaAutosize
+                      cdkAutosizeMinRows="3"
+                      cdkAutosizeMaxRows="6"
+                      formControlName="prompt"
+                      placeholder="A serene landscape with mountains and a lake at sunset"></textarea>
+            <mat-hint>Be specific and descriptive for better results</mat-hint>
+
+            @if (form.get('prompt')?.hasError('required') && form.get('prompt')?.touched) {
+              <mat-error>Prompt is required</mat-error>
+            }
+            @if (form.get('prompt')?.hasError('minlength') && form.get('prompt')?.touched) {
+              <mat-error>Prompt must be at least 3 characters long</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="input-actions">
+            <button mat-icon-button
+                    type="button"
+                    matTooltip="Clear prompt"
+                    [disabled]="isServiceGenerating()"
+                    (click)="clear()">
+              <mat-icon>clear</mat-icon>
+            </button>
+
+            @if (isServiceGenerating()) {
+              <button mat-fab
+                      color="warn"
+                      type="button"
+                      matTooltip="Stop generation"
+                      (click)="stop()">
+                <mat-icon>stop</mat-icon>
+              </button>
+            } @else {
+              <button mat-fab
+                      color="primary"
+                      type="submit"
+                      matTooltip="Generate images (Ctrl+Enter)"
+                      [disabled]="form.invalid || !isServiceInitialized()">
+                <mat-icon>auto_awesome</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        @if (isServiceGenerating()) {
+          <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+          <div class="generating-message">
+            <mat-icon>hourglass_empty</mat-icon>
+            <span>Generating your images...</span>
+          </div>
+        }
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Image Gallery -->
+  <div class="gallery-section" #galleryContainer *ngIf="hasGeneratedImages()">
+    <div class="gallery-header">
+      <h3>Generated Images</h3>
+      <div class="gallery-stats">
+        {{ generatedImages().length }} generation{{ generatedImages().length !== 1 ? 's' : '' }}
+      </div>
+    </div>
+
+    <div class="image-gallery">
+      @for (response of generatedImages(); track response.timestamp) {
+        <div class="generation-group">
+          <div class="generation-info">
+            <div class="prompt-display">
+              <mat-icon>prompt</mat-icon>
+              <span>{{ getFormattedPrompt(response.prompt) }}</span>
+            </div>
+            <div class="generation-meta">
+              <span class="timestamp">{{ response.timestamp | date:'medium' }}</span>
+              <mat-chip-set>
+                @if (response.metadata.style) {
+                  <mat-chip>{{ response.metadata.style }}</mat-chip>
+                }
+                @if (response.metadata.size) {
+                  <mat-chip>{{ response.metadata.size }}</mat-chip>
+                }
+                @if (response.metadata.quality) {
+                  <mat-chip>{{ response.metadata.quality }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          </div>
+
+          <div class="images-grid">
+            @for (image of response.images; track image.url; let i = $index) {
+              <mat-card class="image-card">
+                <div class="image-container">
+                  <img [src]="image.url"
+                       [alt]="getImageAlt(response, i)"
+                       loading="lazy"
+                       (error)="$event.target.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyQzIxIDEzLjEgMjAuMSAxNCAyMCAxNEgyMkMzLjI2IDE0IDMgMTMuNzQgMyAxM1Y1QzMgMy4yNiA0LjI2IDIgNiAySDE4QzE5Ljc0IDIgMjEgMy4yNiAyMSA1VjEyWk05IDEwLjVMNSAxNC41TDE5IDYuNUw5IDEwLjVaIiBmaWxsPSIjOTk5Ii8+Cjwvc3ZnPgo='" />
+
+                  <!-- Image Actions Overlay -->
+                  <div class="image-actions">
+                    <button mat-icon-button
+                            class="action-button"
+                            matTooltip="Download image"
+                            (click)="downloadImage(image.url, response.prompt)">
+                      <mat-icon>download</mat-icon>
+                    </button>
+
+                    <button mat-icon-button
+                            class="action-button"
+                            matTooltip="Copy image URL"
+                            (click)="copyImageUrl(image.url)">
+                      <mat-icon>link</mat-icon>
+                    </button>
+
+                    <button mat-icon-button
+                            class="action-button delete-action"
+                            matTooltip="Remove this image"
+                            [matMenuTriggerFor]="imageMenu">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+
+                    <mat-menu #imageMenu="matMenu">
+                      <button mat-menu-item (click)="removeImage($index)">
+                        <mat-icon class="delete-icon">delete</mat-icon>
+                        <span>Remove Image</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </div>
+              </mat-card>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!hasGeneratedImages() && !isServiceGenerating()">
+    <mat-icon>image_search</mat-icon>
+    <h3>Ready to Create Amazing Images</h3>
+    <p>Describe the image you want and let AI bring your vision to life.</p>
+  </div>
+
+</div>

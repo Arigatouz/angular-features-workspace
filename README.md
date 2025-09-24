@@ -3,7 +3,7 @@
 [![Deploy to GitHub Pages](https://github.com/your-username/angular-features-workspace/actions/workflows/deploy-github-pages.yml/badge.svg)](https://github.com/your-username/angular-features-workspace/actions/workflows/deploy-github-pages.yml)
 [![CI](https://github.com/your-username/angular-features-workspace/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/angular-features-workspace/actions/workflows/ci.yml)
 
-A modern, feature-rich AI conversation assistant built with Angular 20+ and Google's Generative AI. Features secure user API key management, persistent conversation storage, and a beautiful Material Design interface.
+A modern, feature-rich AI assistant built with Angular 20+ and Google's Generative AI. Features both text and image generation capabilities with secure user API key management, persistent storage, and a beautiful Material Design interface.
 
 ## ✨ Features
 
@@ -13,11 +13,12 @@ A modern, feature-rich AI conversation assistant built with Angular 20+ and Goog
 - **Secure storage** using sessionStorage
 - **Visual status indicators** with management controls
 
-### 💬 Advanced Conversation Interface
-- **Modern chat UI** with message bubbles and typing indicators
-- **Conversation management** - rename, delete, export individual chats
-- **Message editing** - modify user messages with inline editing
+### 💬 Advanced AI Generation Capabilities
+- **Text Generation** - Modern chat UI with conversation management
+- **Image Generation** - AI-powered image creation with multiple styles and sizes
 - **Rich markdown rendering** - formatted AI responses with syntax highlighting
+- **Gallery management** - view, download, and organize generated images
+- **Dual interface** - seamless switching between text and image modes
 
 ### 🗄️ Enterprise-Grade Data Storage
 - **IndexedDB integration** using Dexie.js for scalable local storage
@@ -146,15 +147,20 @@ src/
 ├── app/
 │   ├── components/
 │   │   ├── api-key-modal/          # API key management modal
-│   │   └── text-generation/        # Main chat interface
+│   │   ├── text-generation/        # AI text chat interface
+│   │   ├── image-generation/       # AI image creation interface
+│   │   └── side-nav/               # Navigation between modes
 │   ├── services/
 │   │   ├── api-key.service.ts      # API key management
 │   │   ├── conversation.service.ts  # Chat management
 │   │   ├── database.service.ts     # IndexedDB operations
-│   │   └── google-gen-ai.ts        # AI service integration
+│   │   ├── google-gen-ai.ts        # AI text service integration
+│   │   └── image-gen-ai.ts         # AI image service integration
 │   ├── pipes/
 │   │   └── markdown.pipe.ts        # Markdown rendering
 │   └── environments/               # Environment configurations
+├── patterns/                       # Development patterns and examples
+├── config/                         # Configuration references
 ├── .github/
 │   └── workflows/                  # CI/CD pipeline definitions
 └── dist/                          # Built application (auto-generated)
@@ -229,5 +235,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Made with ❤️ using Angular and Google AI**
+
+## 📚 Component Documentation
+
+- **[Text Generation Component](./projects/ai-agent/src/app/components/text-generation/README.md)** - AI text conversation interface
+- **[Image Generation Component](./projects/ai-agent/src/app/components/image-generation/README.md)** - AI image creation interface
+- **[Development Patterns](./patterns/)** - Reusable code patterns and examples
+- **[Grounding Guide](./ANGULAR_GROUNDING_GUIDE.md)** - Claude Code development guide
+- **[Usage Examples](./CLAUDE_CODE_USAGE_EXAMPLES.md)** - Claude Code command examples
 
 **🌟 Star this repo if you find it helpful!**

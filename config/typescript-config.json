@@ -1,0 +1,138 @@
+{
+  "$comment": "ANGULAR AI AGENT PROJECT - TYPESCRIPT CONFIGURATION REFERENCE",
+  "$comment2": "This file demonstrates the key TypeScript configuration patterns used in this project.",
+  "$comment3": "Based on: tsconfig.json from the root of the project",
+
+  "compileOnSave": false,
+
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve"
+  },
+
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "typeCheckHostBindings": true,
+    "strictTemplates": true
+  },
+
+  "files": [],
+  "references": [
+    {
+      "path": "./projects/ai-agent/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/ai-agent/tsconfig.spec.json"
+    }
+  ],
+
+  "_patterns": {
+    "strict_mode_flags": {
+      "strict": "✅ Enables all strict type checking options",
+      "noImplicitOverride": "✅ Ensures explicit 'override' keyword usage",
+      "noPropertyAccessFromIndexSignature": "✅ Prevents unsafe property access",
+      "noImplicitReturns": "✅ Ensures all code paths return a value",
+      "noFallthroughCasesInSwitch": "✅ Prevents accidental fallthrough in switch statements"
+    },
+
+    "compilation_settings": {
+      "skipLibCheck": "✅ Skips type checking of declaration files for faster builds",
+      "isolatedModules": "✅ Ensures each file can be safely transpiled alone",
+      "experimentalDecorators": "✅ Required for Angular decorators",
+      "importHelpers": "✅ Import helper functions from tslib to reduce bundle size"
+    },
+
+    "target_and_modules": {
+      "target": "ES2022 - Modern JavaScript features, good browser support",
+      "module": "preserve - Let bundler handle module system"
+    },
+
+    "angular_compiler_strict_options": {
+      "enableI18nLegacyMessageIdFormat": "false - Use new i18n message format",
+      "strictInjectionParameters": "true - Strict dependency injection checking",
+      "strictInputAccessModifiers": "true - Strict input property access checking",
+      "typeCheckHostBindings": "true - Type check host bindings",
+      "strictTemplates": "true - Strict template type checking"
+    },
+
+    "project_references": {
+      "pattern": "Use project references for workspace organization",
+      "app_config": "./projects/ai-agent/tsconfig.app.json",
+      "test_config": "./projects/ai-agent/tsconfig.spec.json",
+      "benefits": [
+        "Faster builds with incremental compilation",
+        "Better IDE support",
+        "Clear project boundaries"
+      ]
+    },
+
+    "key_conventions": [
+      "✅ Enable ALL strict TypeScript options for type safety",
+      "✅ Use modern ES2022 target for good performance/compatibility balance",
+      "✅ Enable all Angular strict template options",
+      "✅ Use project references for workspace organization",
+      "✅ Skip lib checking for faster builds in development",
+      "✅ Enable experimental decorators for Angular support",
+      "✅ Use import helpers to reduce bundle size"
+    ],
+
+    "development_benefits": [
+      "Early error detection with strict mode",
+      "Better IDE autocomplete and refactoring",
+      "Safer refactoring with strict null checks",
+      "Prevention of common JavaScript pitfalls",
+      "Better template type checking in Angular"
+    ],
+
+    "performance_optimizations": [
+      "skipLibCheck reduces build time",
+      "isolatedModules enables parallel compilation",
+      "importHelpers reduces bundle size",
+      "Project references enable incremental builds"
+    ]
+  },
+
+  "_sample_project_tsconfig_app": {
+    "$comment": "This would be the content of projects/ai-agent/tsconfig.app.json",
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+      "outDir": "../../out-tsc/app",
+      "types": [
+        "node"
+      ]
+    },
+    "files": [
+      "src/main.ts"
+    ],
+    "include": [
+      "src/**/*.d.ts"
+    ]
+  },
+
+  "_sample_project_tsconfig_spec": {
+    "$comment": "This would be the content of projects/ai-agent/tsconfig.spec.json",
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+      "outDir": "../../out-tsc/spec",
+      "types": [
+        "jasmine",
+        "node"
+      ]
+    },
+    "include": [
+      "src/**/*.spec.ts",
+      "src/**/*.d.ts"
+    ]
+  }
+}

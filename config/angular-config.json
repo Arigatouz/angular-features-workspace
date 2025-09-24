@@ -1,0 +1,177 @@
+{
+  "$comment": "ANGULAR AI AGENT PROJECT - ANGULAR.JSON CONFIGURATION REFERENCE",
+  "$comment2": "This file demonstrates the key Angular CLI configuration patterns used in this project.",
+  "$comment3": "Based on: angular.json from the root of the project",
+
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+
+  "projects": {
+    "ai-agent": {
+      "projectType": "application",
+
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+
+      "root": "projects/ai-agent",
+      "sourceRoot": "projects/ai-agent/src",
+      "prefix": "app",
+
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/ai-agent/src/main.ts",
+            "tsConfig": "projects/ai-agent/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/ai-agent/public"
+              }
+            ],
+            "styles": [
+              "projects/ai-agent/src/styles.scss"
+            ]
+          },
+
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "10kB",
+                  "maximumError": "15kB"
+                }
+              ],
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "projects/ai-agent/src/environments/environment.ts",
+                  "with": "projects/ai-agent/src/environments/environment.prod.ts"
+                }
+              ]
+            },
+
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/ai-agent/src/environments/environment.ts",
+                  "with": "projects/ai-agent/src/environments/environment.development.ts"
+                }
+              ]
+            }
+          },
+
+          "defaultConfiguration": "production"
+        },
+
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ai-agent:build:production"
+            },
+            "development": {
+              "buildTarget": "ai-agent:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/ai-agent/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/ai-agent/public"
+              }
+            ],
+            "styles": [
+              "projects/ai-agent/src/styles.scss"
+            ]
+          }
+        }
+      }
+    }
+  },
+
+  "cli": {
+    "analytics": false
+  },
+
+  "_patterns": {
+    "key_conventions": [
+      "✅ Use @angular/build:application builder (new in Angular 17+)",
+      "✅ Set inlineStyleLanguage to 'scss' for SCSS support",
+      "✅ Use file replacements for environment-specific configurations",
+      "✅ Configure build budgets to prevent bundle bloat",
+      "✅ Use projects/ directory for workspace organization",
+      "✅ Set defaultConfiguration to 'production' for security",
+      "✅ Disable analytics for privacy (cli.analytics: false)",
+      "✅ Use 'app' prefix for components",
+      "✅ Configure SCSS as default component style"
+    ],
+
+    "build_configurations": {
+      "production": {
+        "purpose": "Optimized build for deployment",
+        "features": [
+          "Bundle optimization enabled",
+          "Output hashing for cache busting",
+          "Build budgets enforced",
+          "Production environment file used"
+        ]
+      },
+      "development": {
+        "purpose": "Fast rebuilds during development",
+        "features": [
+          "Optimization disabled for faster builds",
+          "Source maps enabled for debugging",
+          "License extraction disabled",
+          "Development environment file used"
+        ]
+      }
+    },
+
+    "bundle_budgets": {
+      "initial": {
+        "warning": "1MB - Large enough for AI app with dependencies",
+        "error": "2MB - Hard limit to prevent performance issues"
+      },
+      "component_styles": {
+        "warning": "10kB - Reasonable component style size",
+        "error": "15kB - Prevents overly complex components"
+      }
+    },
+
+    "environment_replacement": {
+      "pattern": "Replace base environment.ts with specific variants",
+      "development": "environment.development.ts",
+      "production": "environment.prod.ts",
+      "purpose": "Different configurations per environment"
+    },
+
+    "workspace_structure": {
+      "root": "projects/ai-agent - Main application directory",
+      "sourceRoot": "projects/ai-agent/src - Source code location",
+      "assets": "projects/ai-agent/public - Static assets",
+      "styles": "projects/ai-agent/src/styles.scss - Global styles"
+    }
+  }
+}

@@ -17,7 +17,8 @@
       "Bash(git remote add:*)",
       "Bash(git remote remove:*)",
       "Bash(npm run build:prod:*)",
-      "WebFetch(domain:arigatouz.github.io)"
+      "WebFetch(domain:arigatouz.github.io)",
+      "Bash(ng build:*)"
     ],
     "deny": [],
     "ask": []

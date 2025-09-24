@@ -19,3 +19,34 @@
 .mat-drawer-transition .mat-drawer-content {
   padding-left: 15px;
 }
+
+/* Navigation styling */
+mat-nav-list {
+  a[mat-list-item] {
+    margin: 4px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0,0,0,0.04);
+    }
+
+    &.active-route {
+      background-color: var(--mat-sys-primary-container);
+      color: var(--mat-sys-on-primary-container);
+
+      mat-icon {
+        color: var(--mat-sys-on-primary-container);
+      }
+    }
+
+    mat-icon {
+      color: var(--mat-sys-on-surface-variant);
+      margin-right: 8px;
+    }
+
+    span {
+      font-weight: 400;
+    }
+  }
+}

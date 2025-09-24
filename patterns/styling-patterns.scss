@@ -1,0 +1,744 @@
+/**
+ * ANGULAR AI AGENT PROJECT - STYLING & MATERIAL 3 THEMING PATTERNS
+ *
+ * This file demonstrates the key styling patterns used throughout this project.
+ * Use these patterns as reference when creating styles with Claude Code.
+ *
+ * Based on analysis of:
+ * - projects/ai-agent/src/styles.scss (Material 3 theming)
+ * - projects/ai-agent/src/app/components/text-generation/text-generation.scss
+ * - projects/ai-agent/src/app/components/side-nav/side-nav.component.scss
+ */
+
+// ===============================================
+// PATTERN 1: MATERIAL 3 THEME CONFIGURATION
+// ===============================================
+
+// ✅ Always use @use instead of @import for Material
+@use '@angular/material' as mat;
+
+// ✅ Material 3 theme configuration
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$rose-palette,     // Project uses rose as primary
+      tertiary: mat.$red-palette,     // Red as tertiary
+    ),
+    typography: Roboto,               // Always use Roboto for consistency
+    density: 0,                       // Standard density
+  ));
+}
+
+// ✅ Global body styles with Material 3 system variables
+body {
+  color-scheme: light;                              // Set color scheme
+  background-color: var(--mat-sys-surface);        // Use system surface color
+  color: var(--mat-sys-on-surface);                // Use system on-surface color
+  font: var(--mat-sys-body-medium);                // Use system font
+  margin: 0;                                        // Reset margin
+  height: 100%;                                     // Full height
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+html, body {
+  height: 100%;
+}
+
+// ===============================================
+// PATTERN 2: COMPONENT LAYOUT PATTERNS
+// ===============================================
+
+// ✅ Flex container for full-height layouts
+.app-container {
+  width: 100%;
+  height: 90%;
+  overflow: hidden;                 // Prevent scrolling on container
+}
+
+// ✅ Sidebar/Navigation layout pattern
+.conversation-sidenav {
+  width: 280px;                     // Fixed width for consistency
+  background-color: #f8f9fa;       // Light neutral background
+  border-right: 1px solid #e0e0e0; // Subtle border
+
+  // ✅ Header with gradient (common pattern)
+  .sidenav-header {
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;                     // Consistent spacing
+
+      h3 {
+        margin: 0;                  // Reset browser defaults
+        font-weight: 500;           // Medium weight (not bold)
+      }
+    }
+  }
+
+  // ✅ Scrollable list pattern
+  .conversations-list {
+    flex: 1;
+    overflow-y: auto;               // Enable scrolling
+    padding: 8px 0;
+
+    // ✅ Item hover and active states
+    .conversation-item {
+      margin: 4px 8px;
+      border-radius: 8px;           // Rounded corners
+      transition: all 0.2s ease;   // Smooth transitions
+
+      &:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+      }
+
+      &.active {
+        background-color: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+      }
+    }
+  }
+}
+
+// ✅ Main content area layout
+.main-content {
+  background-color: #ffffff;
+  overflow: hidden;
+  min-width: 0;                     // Prevent flex overflow
+  flex: 1;
+}
+
+// ===============================================
+// PATTERN 3: CHAT/MESSAGE INTERFACE PATTERNS
+// ===============================================
+
+// ✅ Flex column layout for chat
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #fafafa;        // Subtle background
+  overflow: hidden;
+  min-width: 0;
+}
+
+// ✅ Chat header pattern
+.chat-header {
+  flex-shrink: 0;                   // Prevent shrinking
+  border-radius: 0;
+  border-bottom: 1px solid #e0e0e0;
+  overflow: hidden;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;                   // Text overflow handling
+    padding: 8px 16px;
+  }
+
+  // ✅ Text overflow handling
+  .conversation-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+
+    mat-card-title {
+      font-size: 18px;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;      // Show ... for long text
+    }
+  }
+}
+
+// ✅ Message list pattern
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: #fafafa;
+  scroll-behavior: smooth;          // Smooth scrolling
+}
+
+// ✅ Individual message styling
+.message {
+  display: flex;
+  margin-bottom: 24px;
+  animation: slideIn 0.3s ease-out; // Entrance animation
+
+  // ✅ User message variant
+  &.message-user {
+    flex-direction: row-reverse;     // Align to right
+
+    .message-content {
+      background-color: #1976d2;
+      color: white;
+      border-radius: 16px 4px 16px 16px; // Asymmetric radius
+    }
+  }
+
+  // ✅ Assistant message variant
+  &.message-assistant {
+    .message-content {
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px 16px 16px 16px; // Asymmetric radius
+    }
+  }
+}
+
+// ✅ Avatar pattern
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;                   // Prevent shrinking
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ✅ Message content with max-width
+.message-content {
+  max-width: 70%;                   // Readable line length
+  padding: 12px 16px;
+  position: relative;
+}
+
+// ===============================================
+// PATTERN 4: FORM AND INPUT PATTERNS
+// ===============================================
+
+// ✅ Settings panel pattern
+.settings-panel {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px;
+  background-color: #f5f5f5;
+
+  &.collapsed {
+    display: none;                  // Hide when collapsed
+  }
+}
+
+// ✅ Form row layout
+.settings-row {
+  display: flex;
+  gap: 16px;                        // Consistent spacing
+  align-items: center;
+  flex-wrap: wrap;                  // Responsive wrapping
+
+  .model-select {
+    min-width: 200px;               // Minimum usable width
+  }
+
+  .slider-control {
+    flex: 1;                        // Take available space
+    min-width: 200px;
+  }
+}
+
+// ✅ Input area pattern
+.input-area {
+  padding: 16px !important;
+}
+
+.input-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;            // Align buttons to input bottom
+
+  .prompt-input {
+    flex: 1;                        // Take most space
+
+    textarea {
+      resize: none;                 // Disable manual resize
+    }
+  }
+}
+
+// ===============================================
+// PATTERN 5: INTERACTIVE STATES & ANIMATIONS
+// ===============================================
+
+// ✅ Hover state patterns
+.conversation-item {
+  .conversation-menu-button {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover .conversation-menu-button {
+    opacity: 1;                     // Show on hover
+  }
+}
+
+.message:hover .message-actions {
+  opacity: 1;                       // Show actions on hover
+}
+
+// ✅ Loading animation (typing indicator)
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 0;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #666;
+    animation: typing 1.4s infinite;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;        // Stagger animation
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-10px);
+  }
+}
+
+// ✅ Slide-in animation for new content
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ===============================================
+// PATTERN 6: ERROR AND STATUS STYLING
+// ===============================================
+
+// ✅ Error banner pattern
+.error-banner {
+  background-color: #ffebee;        // Light red background
+  border: 1px solid #f44336;       // Red border
+  border-radius: 4px;
+  padding: 8px !important;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d32f2f;                   // Dark red text
+
+  span {
+    flex: 1;
+    font-size: 14px;
+  }
+}
+
+// ✅ Empty state pattern
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: #666;
+
+  mat-icon {
+    font-size: 64px;                // Large icon
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    color: #ccc;                    // Muted color
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    color: #333;
+  }
+
+  p {
+    margin: 0;
+    max-width: 400px;               // Readable width
+  }
+}
+
+// ===============================================
+// PATTERN 7: MARKDOWN CONTENT STYLING
+// ===============================================
+
+// ✅ Markdown text styling within messages
+.message-text {
+  line-height: 1.6;                 // Good readability
+  word-break: break-word;           // Handle long words
+
+  // ✅ Reset margins for proper spacing
+  :first-child {
+    margin-top: 0;
+  }
+
+  :last-child {
+    margin-bottom: 0;
+  }
+
+  // ✅ Markdown heading styles
+  ::ng-deep .markdown-h1 {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 1em 0 0.5em 0;
+    color: inherit;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+    padding-bottom: 0.3em;
+  }
+
+  ::ng-deep .markdown-h2 {
+    font-size: 1.3em;
+    font-weight: 600;
+    margin: 0.8em 0 0.4em 0;
+    color: inherit;
+  }
+
+  // ✅ Inline code styling
+  ::ng-deep .markdown-inline-code {
+    background-color: rgba(0,0,0,0.08);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #d63384;                 // Distinctive color
+  }
+
+  // ✅ Code block styling
+  ::ng-deep .markdown-code-block {
+    background-color: rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 6px;
+    padding: 1em;
+    margin: 1em 0;
+    overflow-x: auto;               // Horizontal scroll for long code
+
+    code {
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.85em;
+      color: inherit;
+      white-space: pre;             // Preserve formatting
+    }
+  }
+
+  // ✅ Table styling
+  ::ng-deep .markdown-table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+
+    th, td {
+      border: 1px solid rgba(0,0,0,0.1);
+      padding: 0.6em 0.8em;
+      text-align: left;
+    }
+
+    th {
+      background-color: rgba(0,0,0,0.05);
+      font-weight: 600;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: rgba(0,0,0,0.02); // Zebra striping
+    }
+  }
+}
+
+// ===============================================
+// PATTERN 8: RESPONSIVE DESIGN PATTERNS
+// ===============================================
+
+// ✅ Mobile-first responsive design
+@media (max-width: 768px) {
+  .chat-container {
+    height: 100vh;                  // Full viewport height on mobile
+  }
+
+  .message-content {
+    max-width: 85%;                 // More width on mobile
+  }
+
+  .settings-row {
+    flex-direction: column;         // Stack vertically on mobile
+    align-items: stretch;
+
+    .model-select,
+    .slider-control,
+    .tokens-input {
+      min-width: unset;             // Remove min-width constraints
+      width: 100%;                  // Full width on mobile
+    }
+  }
+
+  .input-container {
+    gap: 8px;                       // Smaller gaps on mobile
+  }
+}
+
+// ===============================================
+// PATTERN 9: GLOBAL COMPONENT STYLES
+// ===============================================
+
+// ✅ Global snackbar styling (using :host ::ng-deep)
+:host ::ng-deep {
+  .success-snackbar {
+    background-color: #4caf50 !important;
+    color: white !important;
+  }
+
+  .error-snackbar {
+    background-color: #f44336 !important;
+    color: white !important;
+  }
+}
+
+// ===============================================
+// PATTERN 10: UTILITY CLASSES
+// ===============================================
+
+// ✅ Common utility classes for consistent styling
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.full-width { width: 100%; }
+.full-height { height: 100%; }
+
+// ✅ Elevation/shadow classes (matching Material Design)
+.elevation-1 {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.elevation-2 {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.elevation-4 {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+// ===============================================
+// PATTERN 11: COLOR SYSTEM
+// ===============================================
+
+// ✅ Semantic color variables (use CSS custom properties)
+:root {
+  // Primary colors (matching theme)
+  --primary-color: #e91e63;         // Rose from Material palette
+  --primary-light: #f8bbd9;
+  --primary-dark: #ad1457;
+
+  // Semantic colors
+  --success-color: #4caf50;
+  --error-color: #f44336;
+  --warning-color: #ff9800;
+  --info-color: #2196f3;
+
+  // Neutral colors
+  --text-primary: rgba(0,0,0,0.87);
+  --text-secondary: rgba(0,0,0,0.6);
+  --text-disabled: rgba(0,0,0,0.38);
+
+  --surface: #ffffff;
+  --surface-variant: #f5f5f5;
+  --background: #fafafa;
+
+  --border-color: #e0e0e0;
+  --divider-color: rgba(0,0,0,0.12);
+}
+
+// ===============================================
+// PATTERN 12: ACCESSIBILITY PATTERNS
+// ===============================================
+
+// ✅ Focus indicators for accessibility
+button:focus-visible,
+.mat-mdc-button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+// ✅ High contrast mode support
+@media (prefers-contrast: high) {
+  .message {
+    border: 2px solid;
+  }
+
+  .conversation-item {
+    border: 1px solid;
+  }
+}
+
+// ✅ Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ===============================================
+// PATTERN 13: COMPONENT STATE CLASSES
+// ===============================================
+
+// ✅ Loading state styling
+.loading-state {
+  opacity: 0.6;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// ✅ Disabled state styling
+.disabled-state {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+// ✅ Error state styling
+.error-state {
+  border-color: var(--error-color) !important;
+
+  .mat-mdc-form-field-error-wrapper {
+    color: var(--error-color);
+  }
+}
+
+// ✅ Success state styling
+.success-state {
+  border-color: var(--success-color) !important;
+
+  &::after {
+    content: '✓';
+    color: var(--success-color);
+  }
+}
+
+/**
+ * ===============================================
+ * STYLING PATTERN SUMMARY
+ * ===============================================
+ *
+ * KEY CONVENTIONS TO FOLLOW:
+ *
+ * 1. ALWAYS use @use instead of @import for Material
+ * 2. ALWAYS use Material 3 system variables (--mat-sys-*)
+ * 3. ALWAYS implement responsive design with mobile-first approach
+ * 4. ALWAYS use semantic color variables
+ * 5. ALWAYS include hover and focus states
+ * 6. ALWAYS use consistent spacing (8px grid system)
+ * 7. ALWAYS handle text overflow with ellipsis
+ * 8. ALWAYS implement smooth transitions (0.2s ease)
+ * 9. ALWAYS support accessibility features
+ * 10. ALWAYS use BEM-like class naming for consistency
+ *
+ * LAYOUT PATTERNS:
+ * - Use flexbox for most layouts
+ * - Use min-width: 0 to prevent flex overflow
+ * - Use flex-shrink: 0 for fixed elements
+ * - Implement proper overflow handling
+ *
+ * ANIMATION PATTERNS:
+ * - Use subtle entrance animations (slideIn)
+ * - Implement staggered animations for lists
+ * - Provide loading states with animations
+ * - Support reduced motion preferences
+ *
+ * COLOR PATTERNS:
+ * - Use Material 3 color system
+ * - Implement semantic color variables
+ * - Use rgba() for transparent overlays
+ * - Support high contrast mode
+ *
+ * TYPOGRAPHY PATTERNS:
+ * - Use Roboto font family
+ * - Implement proper line-height (1.6 for body text)
+ * - Use consistent font weights (400, 500, 600)
+ * - Handle text overflow properly
+ *
+ * COMPONENT PATTERNS:
+ * - Use :host ::ng-deep for global component styles
+ * - Implement proper state classes (loading, error, success)
+ * - Use consistent spacing and sizing
+ * - Provide proper hover and focus states
+ */
