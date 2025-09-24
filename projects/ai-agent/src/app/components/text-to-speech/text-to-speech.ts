@@ -61,12 +61,127 @@ export class TextToSpeechGeneration {
   readonly snackBar = inject(MatSnackBar);
 
   readonly voiceOptions = [
-    {id: 'Kore', label: 'Kore (Default)'},
-    {id: 'Charon', label: 'Charon'},
-    {id: 'Fenrir', label: 'Fenrir'},
-    {id: 'Aoede', label: 'Aoede'},
-  ];
-
+    {
+      id: "achernar",
+      label: "achernar"
+    },
+    {
+      id: "achird",
+      label: "achird"
+    },
+    {
+      id: "algenib",
+      label: "algenib"
+    },
+    {
+      id: "algieba",
+      label: "algieba"
+    },
+    {
+      id: "alnilam",
+      label: "alnilam"
+    },
+    {
+      id: "aoede",
+      label: "aoede"
+    },
+    {
+      id: "autonoe",
+      label: "autonoe"
+    },
+    {
+      id: "callirrhoe",
+      label: "callirrhoe"
+    },
+    {
+      id: "charon",
+      label: "charon"
+    },
+    {
+      id: "despina",
+      label: "despina"
+    },
+    {
+      id: "enceladus",
+      label: "enceladus"
+    },
+    {
+      id: "erinome",
+      label: "erinome"
+    },
+    {
+      id: "fenrir",
+      label: "fenrir"
+    },
+    {
+      id: "gacrux",
+      label: "gacrux"
+    },
+    {
+      id: "iapetus",
+      label: "iapetus"
+    },
+    {
+      id: "kore",
+      label: "kore"
+    },
+    {
+      id: "laomedeia",
+      label: "laomedeia"
+    },
+    {
+      id: "leda",
+      label: "leda"
+    },
+    {
+      id: "orus",
+      label: "orus"
+    },
+    {
+      id: "puck",
+      label: "puck"
+    },
+    {
+      id: "pulcherrima",
+      label: "pulcherrima"
+    },
+    {
+      id: "rasalgethi",
+      label: "rasalgethi"
+    },
+    {
+      id: "sadachbia",
+      label: "sadachbia"
+    },
+    {
+      id: "sadaltager",
+      "label": "sadaltager"
+    },
+    {
+      id: "schedar",
+      label: "schedar"
+    },
+    {
+      id: "sulafat",
+      label: "sulafat"
+    },
+    {
+      id: "umbriel",
+      label: "umbriel"
+    },
+    {
+      id: "vindemiatrix",
+      label: "vindemiatrix"
+    },
+    {
+      id: "zephyr",
+      label: "zephyr"
+    },
+    {
+      id: "zubenelgenubi",
+      label: "zubenelgenubi"
+    }
+  ]
   fb = inject(NonNullableFormBuilder);
   form = this.fb.group({
     text: [this.DEFAULT_TEXT, [Validators.required, Validators.minLength(2)]],
