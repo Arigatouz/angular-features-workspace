@@ -54,18 +54,36 @@ jobs:
         npm run build -- --configuration production --base-href "/$REPO_NAME/"
 
         echo "✅ Angular build completed successfully"
+        echo "📂 Checking build output structure..."
+        ls -la dist/
+        ls -la dist/ai-agent/
+        ls -la dist/ai-agent/browser/
 
     - name: 🌐 Setup SPA routing for GitHub Pages
       run: |
         echo "⚙️ Setting up SPA routing support..."
 
-        # Copy index.html to 404.html for SPA routing support
-        cp dist/ai-agent/browser/index.html dist/ai-agent/browser/404.html
-
-        # Create .nojekyll file to bypass Jekyll processing
-        touch dist/ai-agent/browser/.nojekyll
-
-        echo "✅ SPA routing configured"
+        # Verify the browser directory exists
+        if [ -d "dist/ai-agent/browser" ]; then
+          echo "✅ Browser directory found"
+          # Copy index.html to 404.html for SPA routing support
+          cp dist/ai-agent/browser/index.html dist/ai-agent/browser/404.html
+          # Create .nojekyll file to bypass Jekyll processing
+          touch dist/ai-agent/browser/.nojekyll
+          echo "✅ SPA routing configured for browser folder"
+        else
+          echo "❌ Browser directory not found, checking alternative structure..."
+          ls -la dist/ai-agent/
+          # Fallback for different Angular build structure
+          if [ -f "dist/ai-agent/index.html" ]; then
+            cp dist/ai-agent/index.html dist/ai-agent/404.html
+            touch dist/ai-agent/.nojekyll
+            echo "✅ SPA routing configured for root folder"
+          else
+            echo "❌ No index.html found in expected locations"
+            exit 1
+          fi
+        fi
 
     - name: 📤 Upload build artifacts
       uses: actions/upload-pages-artifact@v3
