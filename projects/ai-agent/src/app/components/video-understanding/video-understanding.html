@@ -100,6 +100,29 @@
             <mat-icon matSuffix>psychology</mat-icon>
           </mat-form-field>
 
+          <!-- Thinking Budget Slider -->
+          <div class="thinking-budget-control">
+            <label class="slider-label">
+              <mat-icon>psychology_alt</mat-icon>
+              Thinking Budget: {{ form.get('thinkingBudget')?.value }} tokens
+            </label>
+            <mat-slider
+              min="0"
+              max="8192"
+              step="256"
+              showTickMarks
+              discrete
+              class="full-width"
+            >
+              <input matSliderThumb formControlName="thinkingBudget" />
+            </mat-slider>
+            <div class="slider-hints">
+              <small class="hint-left">Fast (0)</small>
+              <small class="hint-center">Balanced (4096)</small>
+              <small class="hint-right">Ultra Think (8192)</small>
+            </div>
+          </div>
+
           <!-- Control Buttons -->
           <div class="form-buttons">
             <button
