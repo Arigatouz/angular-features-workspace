@@ -55,42 +55,61 @@
       }
 
       p {
-        margin: 4px 0;
+        margin: 4px 0 16px 0;
         color: #856404;
       }
 
-      .small-text {
-        font-size: 12px;
-        margin-top: 12px;
-
-        code {
-          background: #ffeeba;
-          padding: 2px 6px;
-          border-radius: 3px;
-          font-family: 'Courier New', monospace;
-        }
-      }
-
-      .api-key-link {
-        display: inline-flex;
+      .api-key-actions {
+        display: flex;
+        gap: 12px;
         align-items: center;
-        gap: 4px;
-        color: #004085;
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.2s ease;
+        flex-wrap: wrap;
 
-        &:hover {
-          color: #002752;
-          text-decoration: underline;
+        button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
-        .mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
+        .help-link {
+          color: #1976d2;
+          text-decoration: none;
+
+          &:hover {
+            background: rgba(25, 118, 210, 0.08);
+          }
         }
       }
+    }
+  }
+}
+
+// API Key Success Card
+.api-key-success-card {
+  background: #e8f5e9;
+  border: 2px solid #c8e6c9;
+
+  .api-key-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    span {
+      flex: 1;
+      color: #2e7d32;
+      font-weight: 500;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
   }
 }

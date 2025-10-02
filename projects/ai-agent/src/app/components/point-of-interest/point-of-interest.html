@@ -11,22 +11,38 @@
   </mat-card>
 
   <!-- API Key Instructions -->
-  @if (!googleMapsApiKey) {
+  @if (!hasApiKey()) {
     <mat-card class="api-key-info-card">
       <mat-card-content>
         <div class="api-key-info">
           <mat-icon color="warn">warning</mat-icon>
           <div class="info-text">
             <h4>Google Maps API Key Required</h4>
-            <p>To use the interactive map feature, you need a Google Maps API key.</p>
-            <p>
-              <a [href]="getApiKeyInstructionsUrl()" target="_blank" rel="noopener noreferrer" class="api-key-link">
-                <mat-icon>open_in_new</mat-icon>
-                Get Your Free API Key Here
+            <p>To view points of interest on an interactive map, please provide your Google Maps API key.</p>
+            <div class="api-key-actions">
+              <button mat-raised-button color="primary" (click)="openApiKeyModal()">
+                <mat-icon>vpn_key</mat-icon>
+                Enter API Key
+              </button>
+              <a [href]="getApiKeyInstructionsUrl()" target="_blank" rel="noopener noreferrer" class="help-link" mat-button>
+                <mat-icon>help_outline</mat-icon>
+                How to get an API key
               </a>
-            </p>
-            <p class="small-text">Add your API key to <code>environment.ts</code> file: <code>GOOGLE_MAPS_API_KEY</code></p>
+            </div>
           </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card class="api-key-success-card">
+      <mat-card-content>
+        <div class="api-key-status">
+          <mat-icon color="primary">check_circle</mat-icon>
+          <span>Google Maps API key configured</span>
+          <button mat-button color="warn" (click)="clearApiKey()" matTooltip="Clear API key">
+            <mat-icon>delete</mat-icon>
+            Clear Key
+          </button>
         </div>
       </mat-card-content>
     </mat-card>
@@ -135,7 +151,7 @@
   </mat-card>
 
   <!-- Google Maps and Results Section -->
-  @if (hasResults() && isMapLoaded() && googleMapsApiKey) {
+  @if (hasResults() && isMapLoaded() && hasApiKey()) {
     <div class="map-and-results-container">
       <!-- Map Section -->
       <mat-card class="map-card">
@@ -281,7 +297,7 @@
       </mat-card-content>
     </mat-card>
     </div>
-  } @else if (hasResults() && (!isMapLoaded() || !googleMapsApiKey)) {
+  } @else if (hasResults() && (!isMapLoaded() || !hasApiKey())) {
     <!-- Fallback: Results without map -->
     <mat-card class="results-card">
       <mat-card-header>

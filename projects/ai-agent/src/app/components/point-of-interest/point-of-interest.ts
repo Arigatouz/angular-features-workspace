@@ -13,9 +13,11 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { environment } from '../../../environments/environment';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { GeolocationService, UserPosition } from '../../services/geolocation.service';
 import { PointOfInterestService, POICategory, PointOfInterest as POI } from '../../services/point-of-interest.service';
+import { MapsApiKeyService } from '../../services/maps-api-key.service';
+import { MapsApiKeyModalComponent } from '../maps-api-key-modal/maps-api-key-modal.component';
 
 @Component({
   selector: 'app-point-of-interest',
@@ -34,7 +36,8 @@ import { PointOfInterestService, POICategory, PointOfInterest as POI } from '../
     MatChipsModule,
     MatSnackBarModule,
     MatTooltipModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatDialogModule
   ],
   templateUrl: './point-of-interest.html',
   styleUrl: './point-of-interest.scss'
@@ -47,13 +50,16 @@ export class PointOfInterest implements OnInit {
   readonly poiService = inject(PointOfInterestService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly dialog = inject(MatDialog);
+  private readonly mapsApiKeyService = inject(MapsApiKeyService);
 
   readonly form = this.fb.group({
     selectedCategories: this.fb.control<POICategory[]>([])
   });
 
   // Google Maps API state
-  readonly googleMapsApiKey = environment.GOOGLE_MAPS_API_KEY;
+  readonly googleMapsApiKey = this.mapsApiKeyService.apiKey;
+  readonly hasApiKey = this.mapsApiKeyService.hasApiKey;
   readonly isMapLoaded = signal(false);
 
   // Map configuration
@@ -99,12 +105,37 @@ export class PointOfInterest implements OnInit {
       this.poiService.setSelectedCategories(categories || []);
     });
 
-    // Load Google Maps API
-    this.loadGoogleMapsAPI();
+    // Check if API key exists, otherwise prompt for it
+    if (this.hasApiKey()) {
+      this.loadGoogleMapsAPI();
+    }
+  }
+
+  openApiKeyModal(): void {
+    const dialogRef = this.dialog.open(MapsApiKeyModalComponent, {
+      width: '550px',
+      disableClose: false,
+      panelClass: 'api-key-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.valid && result?.apiKey) {
+        this.mapsApiKeyService.saveApiKey(result.apiKey);
+        this.loadGoogleMapsAPI();
+        this.showSuccess('Google Maps API key saved successfully!');
+      }
+    });
+  }
+
+  clearApiKey(): void {
+    this.mapsApiKeyService.clearApiKey();
+    this.isMapLoaded.set(false);
+    this.showSuccess('Google Maps API key cleared');
   }
 
   private loadGoogleMapsAPI(): void {
-    if (!this.googleMapsApiKey) {
+    const apiKey = this.googleMapsApiKey();
+    if (!apiKey) {
       console.warn('Google Maps API key not configured');
       return;
     }
@@ -117,7 +148,7 @@ export class PointOfInterest implements OnInit {
 
     // Dynamically load Google Maps API
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${this.googleMapsApiKey}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
     script.async = true;
     script.defer = true;
     script.onload = () => {
@@ -126,6 +157,7 @@ export class PointOfInterest implements OnInit {
     script.onerror = () => {
       console.error('Failed to load Google Maps API');
       this.showError('Failed to load Google Maps. Please check your API key.');
+      this.mapsApiKeyService.clearApiKey();
     };
     document.head.appendChild(script);
   }
