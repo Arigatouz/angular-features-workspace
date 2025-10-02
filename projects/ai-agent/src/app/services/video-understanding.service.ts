@@ -12,7 +12,6 @@ export interface VideoUnderstandingRequest {
   videoUrl: string;
   prompt: string;
   model?: string;
-  thinkingBudget?: number;
 }
 
 export interface VideoUnderstandingResponse {
@@ -124,7 +123,6 @@ export class VideoUnderstandingService {
       }
 
       const model = request.model || 'gemini-2.0-flash-exp';
-      const thinkingBudget = request.thinkingBudget ?? 4096;
 
       const response = await this.ai.models.generateContent({
         model: model,
@@ -135,12 +133,7 @@ export class VideoUnderstandingService {
               fileUri: request.videoUrl,
             },
           }
-        ],
-        config: {
-          thinkingConfig: {
-            thinkingBudget: thinkingBudget,
-          }
-        }
+        ]
       });
 
       // Check if request was cancelled during generation

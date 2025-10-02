@@ -63,55 +63,6 @@
       max-width: 300px;
     }
 
-    .thinking-budget-control {
-      padding: 16px;
-      background: rgba(123, 31, 162, 0.05);
-      border-radius: 8px;
-      border: 1px solid rgba(123, 31, 162, 0.2);
-
-      .slider-label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: #7B1FA2;
-        margin-bottom: 12px;
-
-        mat-icon {
-          font-size: 1.2rem;
-          width: 1.2rem;
-          height: 1.2rem;
-        }
-      }
-
-      mat-slider {
-        width: 100%;
-      }
-
-      .slider-hints {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 8px;
-        font-size: 0.75rem;
-        color: rgba(0, 0, 0, 0.6);
-
-        .hint-left,
-        .hint-center,
-        .hint-right {
-          flex: 1;
-        }
-
-        .hint-center {
-          text-align: center;
-        }
-
-        .hint-right {
-          text-align: right;
-        }
-      }
-    }
-
     .video-preview {
       display: flex;
       gap: 16px;

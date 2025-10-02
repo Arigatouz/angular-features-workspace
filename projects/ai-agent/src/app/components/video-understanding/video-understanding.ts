@@ -16,7 +16,6 @@ import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatDialogModule, MatDialog} from '@angular/material/dialog';
 import {MatBadgeModule} from '@angular/material/badge';
-import {MatSliderModule} from '@angular/material/slider';
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {MatChipsModule} from '@angular/material/chips';
 import {VideoUnderstandingService, VideoUnderstandingError} from '../../services/video-understanding.service';
@@ -45,7 +44,6 @@ import {MarkdownPipe} from '../../pipes/markdown.pipe';
     MatMenuModule,
     MatDialogModule,
     MatBadgeModule,
-    MatSliderModule,
     TextFieldModule,
     MatChipsModule,
     MarkdownPipe,
@@ -81,7 +79,6 @@ export class VideoUnderstanding {
     promptTemplate: ['summary', Validators.required],
     customPrompt: ['', []],
     model: [this.modelOptions[0].id, Validators.required],
-    thinkingBudget: [4096, [Validators.min(0), Validators.max(8192)]],
   });
 
   protected loading = signal(false);
@@ -158,7 +155,7 @@ export class VideoUnderstanding {
       return;
     }
 
-    const {videoUrl, customPrompt, model, thinkingBudget} = this.form.getRawValue();
+    const {videoUrl, customPrompt, model} = this.form.getRawValue();
 
     if (!customPrompt.trim()) {
       this.showError('Please enter a prompt for video analysis.');
@@ -173,8 +170,7 @@ export class VideoUnderstanding {
       const response = await this.videoUnderstandingService.analyzeVideo({
         videoUrl: videoUrl,
         prompt: customPrompt,
-        model: model,
-        thinkingBudget: thinkingBudget
+        model: model
       });
 
       this.showSuccess('Video analyzed successfully!');

@@ -1,0 +1,380 @@
+<div class="poi-container">
+  <!-- Header -->
+  <mat-card class="header-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>place</mat-icon>
+      </div>
+      <mat-card-title>Points of Interest Finder</mat-card-title>
+      <mat-card-subtitle>Find nearby places based on your location with interactive Google Maps</mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <!-- API Key Instructions -->
+  @if (!googleMapsApiKey) {
+    <mat-card class="api-key-info-card">
+      <mat-card-content>
+        <div class="api-key-info">
+          <mat-icon color="warn">warning</mat-icon>
+          <div class="info-text">
+            <h4>Google Maps API Key Required</h4>
+            <p>To use the interactive map feature, you need a Google Maps API key.</p>
+            <p>
+              <a [href]="getApiKeyInstructionsUrl()" target="_blank" rel="noopener noreferrer" class="api-key-link">
+                <mat-icon>open_in_new</mat-icon>
+                Get Your Free API Key Here
+              </a>
+            </p>
+            <p class="small-text">Add your API key to <code>environment.ts</code> file: <code>GOOGLE_MAPS_API_KEY</code></p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Location Section -->
+  <mat-card class="location-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon [color]="locationStatus() === 'success' ? 'primary' : 'warn'">
+          {{ getLocationStatusIcon() }}
+        </mat-icon>
+        Your Location
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="location-status">
+        <p>{{ getLocationStatusText() }}</p>
+
+        @if (locationError()) {
+          <div class="error-message">
+            <mat-icon color="warn">warning</mat-icon>
+            {{ locationError()?.message }}
+          </div>
+        }
+      </div>
+
+      <div class="location-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="getCurrentLocation()"
+          [disabled]="isLocationLoading() || !isGeolocationSupported()"
+          matTooltip="Get your current location"
+        >
+          @if (isLocationLoading()) {
+            <mat-icon>refresh</mat-icon>
+          } @else {
+            <mat-icon>my_location</mat-icon>
+          }
+          Get My Location
+        </button>
+
+        @if (currentPosition() && !isPOISearching()) {
+          <button
+            mat-stroked-button
+            (click)="searchNearbyPOIs()"
+            matTooltip="Search for nearby places"
+          >
+            <mat-icon>search</mat-icon>
+            Search POIs
+          </button>
+        }
+      </div>
+
+      @if (isLocationLoading() || isPOISearching()) {
+        <mat-progress-bar mode="indeterminate" class="progress-bar"></mat-progress-bar>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Category Selection -->
+  <mat-card class="categories-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>category</mat-icon>
+        Categories
+        @if (selectedCategoriesCount() > 0) {
+          <mat-chip-set>
+            <mat-chip [color]="'primary'" selected>{{ selectedCategoriesCount() }} selected</mat-chip>
+          </mat-chip-set>
+        }
+      </mat-card-title>
+      <mat-card-subtitle>Select the types of places you're looking for</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="category-actions">
+        <button mat-stroked-button (click)="selectAllCategories()" [disabled]="selectedCategoriesCount() === categories.length">
+          <mat-icon>select_all</mat-icon>
+          Select All
+        </button>
+        <button mat-stroked-button (click)="clearSelection()" [disabled]="selectedCategoriesCount() === 0">
+          <mat-icon>clear_all</mat-icon>
+          Clear All
+        </button>
+      </div>
+
+      <div class="categories-grid">
+        @for (category of categories; track category.id) {
+          <mat-checkbox
+            [checked]="isCategorySelected(category.id)"
+            (change)="onCategoryChange(category.id, $event.checked)"
+            class="category-checkbox"
+            [matTooltip]="category.description"
+          >
+            <div class="category-content">
+              <mat-icon>{{ category.icon }}</mat-icon>
+              <span>{{ category.label }}</span>
+            </div>
+          </mat-checkbox>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Google Maps and Results Section -->
+  @if (hasResults() && isMapLoaded() && googleMapsApiKey) {
+    <div class="map-and-results-container">
+      <!-- Map Section -->
+      <mat-card class="map-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>map</mat-icon>
+            Interactive Map
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="map-container">
+            <google-map
+              [center]="mapCenter()"
+              [zoom]="mapZoom()"
+              [options]="mapOptions"
+              width="100%"
+              height="600px"
+            >
+              <!-- User Location Marker -->
+              @if (currentPosition()) {
+                <map-marker
+                  [position]="{ lat: currentPosition()!.latitude, lng: currentPosition()!.longitude }"
+                  [options]="getUserLocationMarkerOptions()"
+                  [title]="'Your Location'"
+                />
+              }
+
+              <!-- POI Markers -->
+              @for (poi of searchResults(); track poi.id) {
+                <map-marker
+                  #markerElem="mapMarker"
+                  [position]="{ lat: poi.latitude, lng: poi.longitude }"
+                  [options]="getPOIMarkerOptions(poi)"
+                  (mapClick)="onMarkerClick(poi, markerElem)"
+                />
+              }
+
+              <!-- Info Window -->
+              <map-info-window>
+                @if (selectedPOI()) {
+                  <div class="poi-info-window">
+                    <h3>{{ selectedPOI()!.name }}</h3>
+                    <div class="info-details">
+                      @if (selectedPOI()!.rating) {
+                        <div class="rating">
+                          <mat-icon color="accent">star</mat-icon>
+                          <span>{{ selectedPOI()!.rating }}</span>
+                        </div>
+                      }
+                      <p class="address">
+                        <mat-icon>location_on</mat-icon>
+                        {{ selectedPOI()!.address }}
+                      </p>
+                      <p class="distance">
+                        <mat-icon>directions_walk</mat-icon>
+                        {{ formatDistance(selectedPOI()!.distance) }} away
+                      </p>
+                      <p class="category">
+                        <mat-chip [color]="'primary'">
+                          {{ poiService.getCategoryInfo(selectedPOI()!.category)?.label }}
+                        </mat-chip>
+                      </p>
+                    </div>
+                    <button mat-raised-button color="primary" (click)="openGoogleMaps(selectedPOI()!)">
+                      <mat-icon>directions</mat-icon>
+                      Get Directions
+                    </button>
+                  </div>
+                }
+              </map-info-window>
+            </google-map>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Results List Section -->
+      <mat-card class="results-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>list</mat-icon>
+          Nearby Places
+          <mat-chip-set>
+            <mat-chip [color]="'accent'" selected>{{ searchResults().length }} results</mat-chip>
+          </mat-chip-set>
+        </mat-card-title>
+        <mat-card-subtitle>Points of interest near your location</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-list class="results-list">
+          @for (poi of searchResults(); track poi.id) {
+            <mat-list-item
+              class="clickable-poi-item"
+              (click)="onPOIListItemClick(poi)"
+              [class.selected]="selectedPOI()?.id === poi.id"
+              matTooltip="Click to view on map"
+            >
+              <div matListItemAvatar>
+                <mat-icon>{{ poiService.getCategoryInfo(poi.category)?.icon || 'place' }}</mat-icon>
+              </div>
+
+              <div matListItemTitle class="poi-title">
+                {{ poi.name }}
+                @if (poi.rating) {
+                  <div class="rating">
+                    <mat-icon color="accent">star</mat-icon>
+                    <span>{{ poi.rating }}</span>
+                  </div>
+                }
+              </div>
+
+              <div matListItemLine class="poi-details">
+                <div class="poi-address">
+                  <mat-icon>location_on</mat-icon>
+                  {{ poi.address }}
+                </div>
+                <div class="poi-category">
+                  <mat-chip [color]="'primary'">{{ poiService.getCategoryInfo(poi.category)?.label }}</mat-chip>
+                </div>
+                <div class="poi-actions">
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    (click)="openGoogleMaps(poi); $event.stopPropagation()"
+                    matTooltip="Get directions in Google Maps"
+                  >
+                    <mat-icon>directions</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div matListItemMeta class="poi-distance">
+                <mat-icon>directions_walk</mat-icon>
+                {{ formatDistance(poi.distance) }}
+              </div>
+            </mat-list-item>
+
+            @if (!$last) {
+              <mat-divider></mat-divider>
+            }
+          }
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+    </div>
+  } @else if (hasResults() && (!isMapLoaded() || !googleMapsApiKey)) {
+    <!-- Fallback: Results without map -->
+    <mat-card class="results-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>list</mat-icon>
+          Nearby Places
+          <mat-chip-set>
+            <mat-chip [color]="'accent'" selected>{{ searchResults().length }} results</mat-chip>
+          </mat-chip-set>
+        </mat-card-title>
+        <mat-card-subtitle>Points of interest near your location</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-list class="results-list">
+          @for (poi of searchResults(); track poi.id) {
+            <mat-list-item class="clickable-poi-item">
+              <div matListItemAvatar>
+                <mat-icon>{{ poiService.getCategoryInfo(poi.category)?.icon || 'place' }}</mat-icon>
+              </div>
+
+              <div matListItemTitle class="poi-title">
+                {{ poi.name }}
+                @if (poi.rating) {
+                  <div class="rating">
+                    <mat-icon color="accent">star</mat-icon>
+                    <span>{{ poi.rating }}</span>
+                  </div>
+                }
+              </div>
+
+              <div matListItemLine class="poi-details">
+                <div class="poi-address">
+                  <mat-icon>location_on</mat-icon>
+                  {{ poi.address }}
+                </div>
+                <div class="poi-category">
+                  <mat-chip [color]="'primary'">{{ poiService.getCategoryInfo(poi.category)?.label }}</mat-chip>
+                </div>
+                <div class="poi-actions">
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    (click)="openGoogleMaps(poi)"
+                    matTooltip="Open in Google Maps"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div matListItemMeta class="poi-distance">
+                <mat-icon>directions_walk</mat-icon>
+                {{ formatDistance(poi.distance) }}
+              </div>
+            </mat-list-item>
+
+            @if (!$last) {
+              <mat-divider></mat-divider>
+            }
+          }
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  } @else if (currentPosition() && selectedCategoriesCount() > 0 && !isPOISearching()) {
+    <mat-card class="no-results-card">
+      <mat-card-content>
+        <div class="no-results">
+          <mat-icon color="primary" class="large-icon">search_off</mat-icon>
+          <h3>No results found</h3>
+          <p>Try selecting different categories or searching again.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else if (currentPosition() && selectedCategoriesCount() === 0) {
+    <mat-card class="info-card">
+      <mat-card-content>
+        <div class="info-message">
+          <mat-icon color="primary" class="large-icon">info</mat-icon>
+          <h3>Select Categories</h3>
+          <p>Choose the types of places you want to find nearby.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else if (!currentPosition()) {
+    <mat-card class="info-card">
+      <mat-card-content>
+        <div class="info-message">
+          <mat-icon color="primary" class="large-icon">location_searching</mat-icon>
+          <h3>Get Your Location</h3>
+          <p>Click "Get My Location" to start finding nearby points of interest.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
