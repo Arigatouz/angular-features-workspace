@@ -13,7 +13,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { Environment } from '../../Environment/environment';
+import { environment } from '../../../environments/environment';
 import { GeolocationService, UserPosition } from '../../services/geolocation.service';
 import { PointOfInterestService, POICategory, PointOfInterest as POI } from '../../services/point-of-interest.service';
 
@@ -53,7 +53,7 @@ export class PointOfInterest implements OnInit {
   });
 
   // Google Maps API state
-  readonly googleMapsApiKey = Environment.GOOGLE_MAPS_API_KEY;
+  readonly googleMapsApiKey = environment.GOOGLE_MAPS_API_KEY;
   readonly isMapLoaded = signal(false);
 
   // Map configuration
