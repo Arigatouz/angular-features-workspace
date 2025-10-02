@@ -19,7 +19,8 @@
       "Bash(npm run build:prod:*)",
       "WebFetch(domain:arigatouz.github.io)",
       "Bash(ng build:*)",
-      "mcp__angular-cli__get_best_practices"
+      "mcp__angular-cli__get_best_practices",
+      "Bash(ng generate component:*)"
     ],
     "deny": [],
     "ask": []

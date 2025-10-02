@@ -26,6 +26,10 @@ export const routes: Routes = [
     loadComponent: async () => (await import('./components/image-editing/image-editing')).ImageEditingComponent
   },
   {
+    path: 'point-of-interest',
+    loadComponent: async () => (await import('./components/point-of-interest/point-of-interest')).PointOfInterest
+  },
+  {
     path: '',
     redirectTo: 'text-generation',
     pathMatch: 'full'

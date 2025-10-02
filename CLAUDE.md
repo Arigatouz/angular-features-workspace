@@ -62,3 +62,4 @@ npm run serve:ssr:ssr-agent
 - Material Design components throughout the UI
 - Zoneless change detection enabled for better performance
 - when you create a new angular component always use the best practice and make sure to call the angular mcp
+- when you build component make it always dry
